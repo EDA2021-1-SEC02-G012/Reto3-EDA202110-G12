@@ -30,7 +30,8 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
-from DISClib.Algorithms.Sorting import shellsort as sa
+from DISClib.Algorithms.Sorting import shellsort as sa  # TODO ask why
+import datetime
 assert cf
 
 
@@ -71,14 +72,15 @@ def newAnalyzer():
 
 # Funciones para agregar informacion al catalogo
 
-
 def addEvent(analyzer, event):
     lt.addLast(analyzer['listening_events'], event)
-    addEventOnMap(analyzer, event['artist_id'], event['id'], 'artists')
-    addEventOnMap(analyzer, event['track_id'], event['id'], 'tracks')
+    addEventOnProbingMap(analyzer, event['artist_id'], event['id'], 'artists')
+    addEventOnProbingMap(analyzer, event['track_id'], event['id'], 'tracks')
 
 
-def addEventOnMap(catalog, int_input, event, catalog_key):
+# Funciones para agregar un evento a un mapa tipo probing
+
+def addEventOnProbingMap(catalog, int_input, event, catalog_key):
     selected_map = catalog[catalog_key]
     existkey = mp.contains(selected_map, int_input)
     if existkey:
@@ -103,10 +105,69 @@ def newSeparator(key, classifier):
     separator['events'] = lt.newList('ARRAY_LIST', None)
     return separator
 
+
+# Agregar información a un mapa tipo RBT
+
+def updateDateIndex(map, event):
+    """
+    Se toma la fecha del evento y se busca si ya existe en el arbol
+    dicha fecha.
+    """
+    occurreddate = event['created_at']
+    eventdate = datetime.datetime.strptime(occurreddate, '%Y-%m-%d %H:%M:%S')
+    entry = om.get(map, eventdate.date())
+    if entry is None:
+        datentry = newDataEntry(event)
+        om.put(map, eventdate.date(), datentry)
+    else:
+        datentry = me.getValue(entry)
+    addDateIndex(datentry, event)
+    return map
+
+
+def newDataEntry(event):  # TODO Cambiar nombres de índices
+    """
+    Crea una entrada en el indice por fechas, es decir en el arbol
+    binario.
+    """
+    entry = {'offenseIndex': None, 'lstcrimes': None}
+    entry['offenseIndex'] = mp.newMap(
+        numelements=30,
+        maptype='PROBING',
+        comparefunction=compareOffenses)
+    entry['lstcrimes'] = lt.newList('SINGLE_LINKED', compareDates)
+    return entry
+
+
+def addDateIndex(datentry, event):  # TODO Revisar cómo agrupar
+    lst = datentry['lstcrimes']
+    lt.addLast(lst, event)
+    offenseIndex = datentry['offenseIndex']
+    offentry = mp.get(offenseIndex, event['OFFENSE_CODE_GROUP'])
+    if (offentry is None):
+        entry = newOffenseEntry(event['OFFENSE_CODE_GROUP'], event)
+        lt.addLast(entry['lstoffenses'], event)
+        mp.put(offenseIndex, event['OFFENSE_CODE_GROUP'], entry)
+    else:
+        entry = me.getValue(offentry)
+        lt.addLast(entry['lstoffenses'], event)
+    return datentry
+
+
+def newOffenseEntry(offensegrp, event):  # TODO Cambiar nombre
+    """
+    Crea una entrada en el indice por tipo de crimen, es decir en
+    la tabla de hash, que se encuentra en cada nodo del arbol.
+    """
+    ofentry = {'offense': None, 'lstoffenses': None}
+    ofentry['offense'] = offensegrp
+    ofentry['lstoffenses'] = lt.newList('SINGLELINKED', compareOffenses)
+    return ofentry
+
+
 # Funciones para creacion de datos
 
 # Funciones de consulta
-
 
 def eventsSize(analyzer):
     return lt.size(analyzer['listening_events'])
@@ -120,5 +181,30 @@ def tracksSize(analyzer):
     return mp.size(analyzer['tracks'])
 
 # Funciones utilizadas para comparar elementos dentro de una lista
+
+
+def compareDates(date1, date2):
+    """
+    Compara dos fechas
+    """
+    if (date1 == date2):
+        return 0
+    elif (date1 > date2):
+        return 1
+    else:
+        return -1
+
+
+def compareOffenses(offense1, offense2):  # TODO Change name
+    """
+    Compara dos tipos de crimenes
+    """
+    offense = me.getKey(offense2)
+    if (offense1 == offense):
+        return 0
+    elif (offense1 > offense):
+        return 1
+    else:
+        return -1
 
 # Funciones de ordenamiento
