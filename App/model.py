@@ -76,6 +76,8 @@ def addEvent(analyzer, event):
     lt.addLast(analyzer['listening_events'], event)
     addEventOnProbingMap(analyzer, event['artist_id'], event['id'], 'artists')
     addEventOnProbingMap(analyzer, event['track_id'], event['id'], 'tracks')
+    addEventOnOrderedRBTMap(
+        analyzer, event['instrumentalness'], event['id'], 'instrumentalness')
 
 
 # Funciones para agregar un evento a un mapa tipo probing
@@ -108,6 +110,19 @@ def newSeparator(key, classifier):
 
 # Agregar información a un mapa tipo RBT
 
+
+def addEventOnOrderedRBTMap(catalog, int_input, event, catalog_key):
+    selected_map = catalog[catalog_key]
+    existkey = om.contains(selected_map, int_input)
+    if existkey:
+        entry = om.get(selected_map, int_input)
+        value = me.getValue(entry)
+    else:
+        value = newSeparator(int_input, catalog_key)
+        om.put(selected_map, int_input, value)
+    lt.addLast(value['events'], event)
+
+'''
 def updateDateIndex(map, event):
     """
     Se toma la fecha del evento y se busca si ya existe en el arbol
@@ -163,9 +178,10 @@ def newOffenseEntry(offensegrp, event):  # TODO Cambiar nombre
     ofentry['offense'] = offensegrp
     ofentry['lstoffenses'] = lt.newList('SINGLELINKED', compareOffenses)
     return ofentry
-
+'''
 
 # Funciones para creacion de datos
+
 
 # Funciones de consulta
 
@@ -179,6 +195,15 @@ def artistsSize(analyzer):
 
 def tracksSize(analyzer):
     return mp.size(analyzer['tracks'])
+
+
+def getEventsByRange(analyzer, criteria, initial, final):
+    lst = om.values(analyzer[criteria], initial, final)
+    events = 0
+    for lstevents in lt.iterator(lst):
+        events += lt.size(lstevents['events'])
+    return events
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

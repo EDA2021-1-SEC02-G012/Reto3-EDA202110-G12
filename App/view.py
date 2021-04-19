@@ -42,6 +42,8 @@ def printMenu():
     print("Bienvenido")
     print("1- Inicializar analizador")
     print("2- Cargar información en el catálogo")
+    print("3- Conocer cuántas reproducciones se tienen con una característica")
+    print(" específica de contenido y un rango determinado")
 
 
 def printfirstandlast5(arraylist):
@@ -67,7 +69,7 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
 
     if int(inputs[0]) == 1:
-        analysis_file = 'context_content_features-5.csv'
+        analysis_file = 'context_content_features-80pct.csv'
         analyzer = controller.init()
 
     elif int(inputs[0]) == 2:
@@ -82,7 +84,10 @@ while True:
         printfirstandlast5(analyzer)
 
     elif int(inputs[0]) == 3:
-        pass
+        criteria = input("Ingrese el criterio a evaluar: ")
+        initial = input("Ingrese el límite inferior: ")
+        final = input("Ingrese el límite superior: ")
+        print(controller.getEventsByRange(analyzer, criteria, initial, final))
 
     else:
         sys.exit(0)

@@ -96,6 +96,10 @@ def loadData(analyzer, file):
 # Funciones de consulta sobre el analyzer
 
 
+def getEventsByRange(analyzer, criteria, initial, final):
+    return model.getEventsByRange(analyzer, criteria, initial, final)
+
+
 def eventsSize(analyzer):
     """
     Número de eventos cargados
