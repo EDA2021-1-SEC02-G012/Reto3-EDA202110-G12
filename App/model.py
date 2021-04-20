@@ -65,7 +65,6 @@ def newAnalyzer():
     analyzer['energy'] = om.newMap(omaptype='RBT')
     analyzer['danceability'] = om.newMap(omaptype='RBT')
     analyzer['valence'] = om.newMap(omaptype='RBT')
-    analyzer['listening_time'] = om.newMap(omaptype='RBT')
 
     return analyzer
 
@@ -78,6 +77,18 @@ def addEvent(analyzer, event):
     addEventOnProbingMap(analyzer, event['track_id'], event['id'], 'tracks')
     addEventOnOrderedRBTMap(
         analyzer, event['instrumentalness'], event['id'], 'instrumentalness')
+    addEventOnOrderedRBTMap(
+        analyzer, event['acousticness'], event['id'], 'acousticness')
+    addEventOnOrderedRBTMap(
+        analyzer, event['liveness'], event['id'], 'liveness')
+    addEventOnOrderedRBTMap(
+        analyzer, event['speechiness'], event['id'], 'speechiness')
+    addEventOnOrderedRBTMap(
+        analyzer, event['energy'], event['id'], 'energy')
+    addEventOnOrderedRBTMap(
+        analyzer, event['danceability'], event['id'], 'danceability')
+    addEventOnOrderedRBTMap(
+        analyzer, event['valence'], event['id'], 'valence')
 
 
 # Funciones para agregar un evento a un mapa tipo probing

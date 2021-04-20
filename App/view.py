@@ -39,7 +39,7 @@ events_analysis_file = 'context_content_features-5pct.csv'
 
 
 def printMenu():
-    print("Bienvenido")
+    print("____________________________")
     print("1- Inicializar analizador")
     print("2- Cargar información en el catálogo")
     print("3- Conocer cuántas reproducciones se tienen con una característica")
@@ -69,7 +69,6 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
 
     if int(inputs[0]) == 1:
-        analysis_file = 'context_content_features-80pct.csv'
         analyzer = controller.init()
 
     elif int(inputs[0]) == 2:
