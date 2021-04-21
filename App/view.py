@@ -35,14 +35,13 @@ operación seleccionada.
 """
 
 analyzer = None
-events_analysis_file = 'context_content_features-5pct.csv'
+events_analysis_file = 'context_content_features-small.csv'
 
 
 def printMenu():
     print("____________________________")
-    print("1- Inicializar analizador")
-    print("2- Cargar información en el catálogo")
-    print("3- Conocer cuántas reproducciones se tienen con una característica")
+    print("1- Inicializar analizador y cargar datos")
+    print("2- Conocer cuántas reproducciones se tienen con una característica")
     print(" específica de contenido y un rango determinado")
 
 
@@ -51,15 +50,47 @@ def printfirstandlast5(arraylist):
     i = 1
     listsize = lt.size(printlist)
     while i <= 5:
-        print(lt.getElement(printlist, i))
+        element = lt.getElement(printlist, i)
+        print('\n')
+        print(
+                'Track ID: ' + str(element.get('track_id')) + ", " +
+                'Instrumentalness: ' + str(element.get('instrumentalness'))
+                + ", " + 'Liveness: ' + str(element.get('liveness')) + ", " +
+                'Speechiness: ' + str(element.get('speechiness')) + ", " +
+                'Danceability: ' + str(element.get('danceability')) + ", " +
+                'Valence: ' + str(element.get('valence')) + ", " +
+                'Loudness: ' + str(element.get('loudness')) + ", " +
+                'Tempo: ' + str(element.get('tempo')) + ", " +
+                'Acousticness: ' + str(element.get('acousticness')) + ", " +
+                'Energy: ' + str(element.get('energy')) + ", " +
+                'Mode: ' + str(element.get('mode')) + ", " +
+                'key: ' + str(element.get('key')) + ", " +
+                'Artist ID: ' + str(element.get('artist_id')) + ", " +
+                'Created at: ' + str(element.get('created_at')) + ", " +
+                'User ID: ' + str(element.get('user_id')))
         i += 1
     i = listsize
     while i > (listsize - 5):
-        print(lt.getElement(printlist, (listsize - i)))
+        element = lt.getElement(printlist, (i))
+        print('\n')
+        print(
+                'Track ID: ' + str(element.get('track_id')) + ", " +
+                'Instrumentalness: ' + str(element.get('instrumentalness'))
+                + ", " + 'Liveness: ' + str(element.get('liveness')) + ", " +
+                'Speechiness: ' + str(element.get('speechiness')) + ", " +
+                'Danceability: ' + str(element.get('danceability')) + ", " +
+                'Valence: ' + str(element.get('valence')) + ", " +
+                'Loudness: ' + str(element.get('loudness')) + ", " +
+                'Tempo: ' + str(element.get('tempo')) + ", " +
+                'Acousticness: ' + str(element.get('acousticness')) + ", " +
+                'Energy: ' + str(element.get('energy')) + ", " +
+                'Mode: ' + str(element.get('mode')) +
+                'key: ' + str(element.get('key')) +
+                'Artist ID: ' + str(element.get('artist_id')) +
+                'Created at: ' + str(element.get('created_at')) +
+                'User ID: ' + str(element.get('user_id')))
         i -= 1
 
-
-catalog = None
 
 """
 Menu principal
@@ -70,8 +101,6 @@ while True:
 
     if int(inputs[0]) == 1:
         analyzer = controller.init()
-
-    elif int(inputs[0]) == 2:
         print("Cargando información de los archivos ....")
         controller.loadData(analyzer, events_analysis_file)
         print('Registro de eventos Cargados: ' + str(controller.eventsSize(
@@ -82,11 +111,15 @@ while True:
             analyzer)))
         printfirstandlast5(analyzer)
 
-    elif int(inputs[0]) == 3:
+    elif int(inputs[0]) == 2:
         criteria = input("Ingrese el criterio a evaluar: ")
-        initial = input("Ingrese el límite inferior: ")
-        final = input("Ingrese el límite superior: ")
-        print(controller.getEventsByRange(analyzer, criteria, initial, final))
+        initial = float(input("Ingrese el límite inferior: "))
+        final = float(input("Ingrese el límite superior: "))
+        print("Buscando en la base de datos ....")
+        result = controller.getEventsByRange(
+            analyzer, criteria, initial, final)
+        print('Registro de eventos Cargados: ' + str(result[0]))
+        print('Artistas únicos Cargados: ' + str(result[1]))
 
     else:
         sys.exit(0)

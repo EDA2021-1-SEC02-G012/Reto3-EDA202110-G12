@@ -39,42 +39,6 @@ def init():
     return analyzer
 
 
-'''
-def info_chooser(subsample):
-    try:
-        sentiment_values = 'sentiment_values.csv'  # Always the same
-
-        if subsample == 1:
-            sample_folder = 'subsample-5pct'
-            events_analysis_file = 'context_content_features-5.csv'
-        elif subsample == 2:
-            sample_folder = 'subsample-10pct'
-            events_analysis_file = 'context_content_features-10.csv'
-        elif subsample == 3:
-            sample_folder = 'subsample-20pct'
-            events_analysis_file = 'context_content_features-20.csv'
-        elif subsample == 4:
-            sample_folder = 'subsample-30pct'
-            events_analysis_file = 'context_content_features-30.csv'
-        elif subsample == 5:
-            sample_folder = 'subsample-50pct'
-            events_analysis_file = 'context_content_features-50.csv'
-        elif subsample == 6:
-            sample_folder = 'subsample-80pct'
-            events_analysis_file = 'context_content_features-80.csv'
-        elif subsample == 7:
-            sample_folder = 'subsample-large'
-            events_analysis_file = 'context_content_features-80.csv'
-        elif subsample == 8:
-            sample_folder = 'subsample-small'
-            events_analysis_file = 'context_content_features-small.csv'
-
-        route = sample_folder + '/' + events_analysis_file
-
-    except:
-        print("No se ha seleccionado un directorio válido.")
-'''
-
 # Inicialización del Catálogo
 
 

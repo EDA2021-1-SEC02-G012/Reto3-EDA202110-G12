@@ -30,8 +30,6 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
-from DISClib.Algorithms.Sorting import shellsort as sa  # TODO ask why
-import datetime
 assert cf
 
 
@@ -76,32 +74,52 @@ def addEvent(analyzer, event):
     addEventOnProbingMap(analyzer, event['artist_id'], event['id'], 'artists')
     addEventOnProbingMap(analyzer, event['track_id'], event['id'], 'tracks')
     addEventOnOrderedRBTMap(
-        analyzer, event['instrumentalness'], event['id'], 'instrumentalness')
+        analyzer, float(event['instrumentalness']),
+        (event['id'], event['artist_id'], event['track_id']),
+        'instrumentalness')
     addEventOnOrderedRBTMap(
-        analyzer, event['acousticness'], event['id'], 'acousticness')
+        analyzer, float(event['acousticness']),
+        (event['id'], event['artist_id'], event['track_id']), 'acousticness')
     addEventOnOrderedRBTMap(
-        analyzer, event['liveness'], event['id'], 'liveness')
+        analyzer, float(event['liveness']),
+        (event['id'], event['artist_id'], event['track_id']), 'liveness')
     addEventOnOrderedRBTMap(
-        analyzer, event['speechiness'], event['id'], 'speechiness')
+        analyzer, float(event['speechiness']),
+        (event['id'], event['artist_id'], event['track_id']), 'speechiness')
     addEventOnOrderedRBTMap(
-        analyzer, event['energy'], event['id'], 'energy')
+        analyzer, float(event['energy']),
+        (event['id'], event['artist_id'], event['track_id']), 'energy')
     addEventOnOrderedRBTMap(
-        analyzer, event['danceability'], event['id'], 'danceability')
+        analyzer, float(event['danceability']),
+        (event['id'], event['artist_id'], event['track_id']), 'danceability')
     addEventOnOrderedRBTMap(
-        analyzer, event['valence'], event['id'], 'valence')
+        analyzer, float(event['valence']),
+        (event['id'], event['artist_id'], event['track_id']), 'valence')
 
 
 # Funciones para agregar un evento a un mapa tipo probing
 
-def addEventOnProbingMap(catalog, int_input, event, catalog_key):
-    selected_map = catalog[catalog_key]
+def addEventOnProbingMap(analyzer, int_input, event, map_key):
+    selected_map = analyzer[map_key]
     existkey = mp.contains(selected_map, int_input)
     if existkey:
         entry = mp.get(selected_map, int_input)
         value = me.getValue(entry)
     else:
-        value = newSeparator(int_input, catalog_key)
+        value = newSeparator(int_input, map_key)
         mp.put(selected_map, int_input, value)
+    lt.addLast(value['events'], event)
+
+
+def addEventOnOrderedRBTMap(analyzer, int_input, event, map_key):
+    selected_map = analyzer[map_key]
+    existkey = om.contains(selected_map, int_input)
+    if existkey:
+        entry = om.get(selected_map, int_input)
+        value = me.getValue(entry)
+    else:
+        value = newSeparator(int_input, map_key)
+        om.put(selected_map, int_input, value)
     lt.addLast(value['events'], event)
 
 
@@ -117,79 +135,6 @@ def newSeparator(key, classifier):
     separator[classifier] = key
     separator['events'] = lt.newList('ARRAY_LIST', None)
     return separator
-
-
-# Agregar información a un mapa tipo RBT
-
-
-def addEventOnOrderedRBTMap(catalog, int_input, event, catalog_key):
-    selected_map = catalog[catalog_key]
-    existkey = om.contains(selected_map, int_input)
-    if existkey:
-        entry = om.get(selected_map, int_input)
-        value = me.getValue(entry)
-    else:
-        value = newSeparator(int_input, catalog_key)
-        om.put(selected_map, int_input, value)
-    lt.addLast(value['events'], event)
-
-'''
-def updateDateIndex(map, event):
-    """
-    Se toma la fecha del evento y se busca si ya existe en el arbol
-    dicha fecha.
-    """
-    occurreddate = event['created_at']
-    eventdate = datetime.datetime.strptime(occurreddate, '%Y-%m-%d %H:%M:%S')
-    entry = om.get(map, eventdate.date())
-    if entry is None:
-        datentry = newDataEntry(event)
-        om.put(map, eventdate.date(), datentry)
-    else:
-        datentry = me.getValue(entry)
-    addDateIndex(datentry, event)
-    return map
-
-
-def newDataEntry(event):  # TODO Cambiar nombres de índices
-    """
-    Crea una entrada en el indice por fechas, es decir en el arbol
-    binario.
-    """
-    entry = {'offenseIndex': None, 'lstcrimes': None}
-    entry['offenseIndex'] = mp.newMap(
-        numelements=30,
-        maptype='PROBING',
-        comparefunction=compareOffenses)
-    entry['lstcrimes'] = lt.newList('SINGLE_LINKED', compareDates)
-    return entry
-
-
-def addDateIndex(datentry, event):  # TODO Revisar cómo agrupar
-    lst = datentry['lstcrimes']
-    lt.addLast(lst, event)
-    offenseIndex = datentry['offenseIndex']
-    offentry = mp.get(offenseIndex, event['OFFENSE_CODE_GROUP'])
-    if (offentry is None):
-        entry = newOffenseEntry(event['OFFENSE_CODE_GROUP'], event)
-        lt.addLast(entry['lstoffenses'], event)
-        mp.put(offenseIndex, event['OFFENSE_CODE_GROUP'], entry)
-    else:
-        entry = me.getValue(offentry)
-        lt.addLast(entry['lstoffenses'], event)
-    return datentry
-
-
-def newOffenseEntry(offensegrp, event):  # TODO Cambiar nombre
-    """
-    Crea una entrada en el indice por tipo de crimen, es decir en
-    la tabla de hash, que se encuentra en cada nodo del arbol.
-    """
-    ofentry = {'offense': None, 'lstoffenses': None}
-    ofentry['offense'] = offensegrp
-    ofentry['lstoffenses'] = lt.newList('SINGLELINKED', compareOffenses)
-    return ofentry
-'''
 
 # Funciones para creacion de datos
 
@@ -211,9 +156,19 @@ def tracksSize(analyzer):
 def getEventsByRange(analyzer, criteria, initial, final):
     lst = om.values(analyzer[criteria], initial, final)
     events = 0
+    artists = mp.newMap(maptype='PROBING')
+    tracks = mp.newMap(maptype='PROBING')
+
     for lstevents in lt.iterator(lst):
         events += lt.size(lstevents['events'])
-    return events
+        for soundtrackyourtimeline in lt.iterator(lstevents['events']):
+            mp.put(artists, soundtrackyourtimeline[1], 1)
+            mp.put(tracks, soundtrackyourtimeline[2], 1)
+
+    artists_size = mp.size(artists)
+    tracks_size = mp.size(tracks)
+
+    return events, artists_size, tracks_size
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
@@ -230,17 +185,5 @@ def compareDates(date1, date2):
     else:
         return -1
 
-
-def compareOffenses(offense1, offense2):  # TODO Change name
-    """
-    Compara dos tipos de crimenes
-    """
-    offense = me.getKey(offense2)
-    if (offense1 == offense):
-        return 0
-    elif (offense1 > offense):
-        return 1
-    else:
-        return -1
 
 # Funciones de ordenamiento
