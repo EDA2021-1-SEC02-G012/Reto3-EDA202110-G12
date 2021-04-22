@@ -3,7 +3,7 @@
  * de Los Andes
  *
  *
- * Desarrolado para el curso ISIS1225 - Estructuras de Datos y Algoritmos
+ * Desarrollado para el curso ISIS1225 - Estructuras de Datos y Algoritmos
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,10 +39,14 @@ events_analysis_file = 'context_content_features-small.csv'
 
 
 def printMenu():
-    print("____________________________")
+    print("_"*60)
     print("1- Inicializar analizador y cargar datos")
-    print("2- Conocer cuántas reproducciones se tienen con una característica")
-    print(" específica de contenido y un rango determinado")
+    print(
+        "2- Conocer cuántas reproducciones se tienen con una característica " +
+        "específica de contenido y un rango determinado")
+    print("3- Encontrar música para festejar")
+    print("4- Encontrar música para estudiar")
+    print("Presione cualquier otra tecla para salir")
 
 
 def printfirstandlast5(arraylist):
@@ -102,14 +106,19 @@ while True:
     if int(inputs[0]) == 1:
         analyzer = controller.init()
         print("Cargando información de los archivos ....")
-        controller.loadData(analyzer, events_analysis_file)
+        answer = controller.loadData(analyzer, events_analysis_file)
         print('Registro de eventos Cargados: ' + str(controller.eventsSize(
             analyzer)))
         print('Artistas únicos Cargados: ' + str(controller.artistsSize(
             analyzer)))
         print('Pistas únicas Cargados: ' + str(controller.tracksSize(
             analyzer)))
+        print('\n')
+        print('Primeros y últimos 5 cargados, respectivamente: ')
         printfirstandlast5(analyzer)
+        print('\n')
+        print("Tiempo [ms]: ", f"{answer[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{answer[1]:.3f}")
 
     elif int(inputs[0]) == 2:
         criteria = input("Ingrese el criterio a evaluar: ")
@@ -120,6 +129,37 @@ while True:
             analyzer, criteria, initial, final)
         print('Registro de eventos Cargados: ' + str(result[0]))
         print('Artistas únicos Cargados: ' + str(result[1]))
+
+    elif int(inputs[0]) == 3:
+        initialenergy = float(input(
+            "Ingrese el límite inferior para la energía: "))
+        finalenergy = float(input(
+            "Ingrese el límite superior para la energía: "))
+        energyrange = (initialenergy, finalenergy)
+        initialdanceability = float(input(
+            "Ingrese el límite inferior para la perreabilidad: "))
+        finaldanceability = float(input(
+            "Ingrese el límite superior para la perreabilidad: "))
+        danceabilityrange = (initialdanceability, finaldanceability)
+        print("Buscando en la base de datos ....")
+        print(controller.getMusicToParty(
+            analyzer, energyrange, danceabilityrange))
+
+    elif int(inputs[0]) == 4:
+        initialinstrumentalness = float(input(
+            "Ingrese el límite inferior para la instrumentalidad: "))
+        finalinstrumentalness = float(input(
+            "Ingrese el límite superior para la instrumentalidad: "))
+        instrumentalnessrange = (
+            initialinstrumentalness, finalinstrumentalness)
+        initialtempo = float(input(
+            "Ingrese el límite inferior para el tempo: "))
+        finaltempo = float(input(
+            "Ingrese el límite superior para el tempo: "))
+        temporange = (initialtempo, finaltempo)
+        print("Buscando en la base de datos ....")
+        print(controller.getMusicToStudy(
+            analyzer, instrumentalnessrange, temporange))
 
     else:
         sys.exit(0)

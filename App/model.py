@@ -50,7 +50,8 @@ def newAnalyzer():
                 'speechiness': None,
                 'energy': None,
                 'danceability': None,
-                'valence': None
+                'valence': None,
+                'tempo': None
                 }
 
     analyzer['listening_events'] = lt.newList(datastructure='ARRAY_LIST')
@@ -63,6 +64,7 @@ def newAnalyzer():
     analyzer['energy'] = om.newMap(omaptype='RBT')
     analyzer['danceability'] = om.newMap(omaptype='RBT')
     analyzer['valence'] = om.newMap(omaptype='RBT')
+    analyzer['tempo'] = om.newMap(omaptype='RBT')
 
     return analyzer
 
@@ -95,6 +97,9 @@ def addEvent(analyzer, event):
     addEventOnOrderedRBTMap(
         analyzer, float(event['valence']),
         (event['id'], event['artist_id'], event['track_id']), 'valence')
+    addEventOnOrderedRBTMap(
+        analyzer, float(event['tempo']),
+        (event['id'], event['artist_id'], event['track_id']), 'tempo')
 
 
 # Funciones para agregar un evento a un mapa tipo probing
@@ -136,8 +141,6 @@ def newSeparator(key, classifier):
     separator['events'] = lt.newList('ARRAY_LIST', None)
     return separator
 
-# Funciones para creacion de datos
-
 
 # Funciones de consulta
 
@@ -168,8 +171,30 @@ def getEventsByRange(analyzer, criteria, initial, final):
     artists_size = mp.size(artists)
     tracks_size = mp.size(tracks)
 
-    return events, artists_size, tracks_size
+    return events, artists_size, tracks_size, artists, tracks
 
+
+def getTrcForTwoCriteria(analyzer, criteria1range, str1, criteria2range, str2):
+    # TODO Add unique artists iteration
+    list = lt.newList('ARRAY_LIST')
+    criteria1 = getEventsByRange(
+        analyzer, str1, criteria1range[0], criteria1range[1])
+    criteria1trackslist = mp.keySet(criteria1[4])
+    criteria2 = getEventsByRange(
+        analyzer, str2, criteria2range[0], criteria2range[1])
+    criteria2trackslist = mp.keySet(criteria2[4])
+
+    for key in lt.iterator(criteria1trackslist):
+        presence = lt.isPresent(list, key)  # Está este puerco
+        if not presence:
+            lt.addLast(list, key)
+
+    for key in lt.iterator(criteria2trackslist):
+        presence = lt.isPresent(list, key)
+        if not presence:
+            lt.addLast(list, key)
+
+    return lt.size(list)
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
