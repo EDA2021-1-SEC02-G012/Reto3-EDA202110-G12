@@ -175,26 +175,32 @@ def getEventsByRange(analyzer, criteria, initial, final):
 
 
 def getTrcForTwoCriteria(analyzer, criteria1range, str1, criteria2range, str2):
-    # TODO Add unique artists iteration
-    list = lt.newList('ARRAY_LIST')
+    listtracks = mp.newMap(maptype='PROBING')
+    listartists = mp.newMap(maptype='PROBING')
+
     criteria1 = getEventsByRange(
         analyzer, str1, criteria1range[0], criteria1range[1])
     criteria1trackslist = mp.keySet(criteria1[4])
+    criteria1artistslist = mp.keySet(criteria1[3])
+
     criteria2 = getEventsByRange(
         analyzer, str2, criteria2range[0], criteria2range[1])
     criteria2trackslist = mp.keySet(criteria2[4])
+    criteria2artistslist = mp.keySet(criteria2[3])
 
     for key in lt.iterator(criteria1trackslist):
-        presence = lt.isPresent(list, key)  # Está este puerco
-        if not presence:
-            lt.addLast(list, key)
+        mp.put(listtracks, key, 1)
+
+    for key in lt.iterator(criteria1artistslist):
+        mp.put(listartists, key, 1)
 
     for key in lt.iterator(criteria2trackslist):
-        presence = lt.isPresent(list, key)
-        if not presence:
-            lt.addLast(list, key)
+        mp.put(listtracks, key, 1)
 
-    return lt.size(list)
+    for key in lt.iterator(criteria2artistslist):
+        mp.put(listartists, key, 1)
+
+    return (mp.size(listtracks), mp.size(listartists))
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
