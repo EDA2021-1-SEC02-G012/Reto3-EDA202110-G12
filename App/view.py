@@ -23,9 +23,9 @@
 import config as cf
 import sys
 import controller
+import os
 from DISClib.ADT import list as lt
 assert cf
-
 
 """
 La vista se encarga de la interacción con el usuario.
@@ -36,16 +36,29 @@ operación seleccionada.
 
 analyzer = None
 events_analysis_file = 'context_content_features-small.csv'
+rows, columns = os.popen('stty size', 'r').read().split()
+genre = {
+    '1- reggae': (60, 90),
+    '2- down-tempo': (70, 100),
+    '3- chill-out': (90, 120),
+    '4- hip-hop': (85, 115),
+    '5- jazz and funk': (120, 125),
+    '6- pop': (100, 130),
+    '7- r&b': (60, 80),
+    '8- rock': (110, 140),
+    '9- metal': (100, 160)}
 
 
 def printMenu():
-    print("_"*60)
+    print("_"*int(columns))
     print("1- Inicializar analizador y cargar datos")
     print(
         "2- Conocer cuántas reproducciones se tienen con una característica " +
         "específica de contenido y un rango determinado")
     print("3- Encontrar música para festejar")
     print("4- Encontrar música para estudiar")
+    print("5- Agregar un género a la base de datos")
+    print("5- Encontrar música por género")
     print("Presione cualquier otra tecla para salir")
 
 
@@ -160,6 +173,9 @@ while True:
         print("Buscando en la base de datos ....")
         print(controller.getMusicToStudy(
             analyzer, instrumentalnessrange, temporange))
+    
+    elif int(inputs[0]) == 5:
+        print
 
     else:
         sys.exit(0)
