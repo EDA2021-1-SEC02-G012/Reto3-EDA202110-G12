@@ -174,6 +174,23 @@ def getEventsByRange(analyzer, criteria, initial, final):
     return events, artists_size, tracks_size, artists, tracks
 
 
+def getEventsByRangeGenres(analyzer, criteria, dicc, lista):
+    resultado = {}
+    llaves = []
+    for llave in dicc: 
+        llaves.append(llave[0])
+    for i in lista: 
+        for llave in dicc: 
+            if i in llave:  
+                lim = dicc[llave]
+                lim_inf = lim[0]
+                lim_sup = lim[1]
+                result = getEventsByRange(analyzer, criteria, lim_inf, lim_sup)
+                resultado[llave] = result
+
+    return resultado
+
+
 def getTrcForTwoCriteria(analyzer, criteria1range, str1, criteria2range, str2):
     listtracks = mp.newMap(maptype='PROBING')
     listartists = mp.newMap(maptype='PROBING')

@@ -47,6 +47,16 @@ genre = {
     '7- r&b': (60, 80),
     '8- rock': (110, 140),
     '9- metal': (100, 160)}
+genre_number = {
+    '1': (60, 90),
+    '2': (70, 100),
+    '3': (90, 120),
+    '4': (85, 115),
+    '5': (120, 125),
+    '6': (100, 130),
+    '7': (60, 80),
+    '8': (110, 140),
+    '9': (100, 160)}
 
 
 def printMenu():
@@ -58,7 +68,7 @@ def printMenu():
     print("3- Encontrar música para festejar")
     print("4- Encontrar música para estudiar")
     print("5- Agregar un género a la base de datos")
-    print("5- Encontrar música por género")
+    print("6 - Encontrar música por género(s)")
     print("Presione cualquier otra tecla para salir")
 
 
@@ -107,6 +117,15 @@ def printfirstandlast5(arraylist):
                 'Created at: ' + str(element.get('created_at')) +
                 'User ID: ' + str(element.get('user_id')))
         i -= 1
+
+
+def print_genre(dicc): 
+
+    for genre in dicc: 
+        result = dicc[genre]
+        print(genre)
+        print('Registro de eventos Cargados: ' + str(result[0]))
+        print('Artistas únicos Cargados: ' + str(result[1]))
 
 
 """
@@ -175,8 +194,31 @@ while True:
             analyzer, instrumentalnessrange, temporange))
     
     elif int(inputs[0]) == 5:
-        print
+        genero = input("Ingrese el nombre del género musical: ")
+        lim_inf = int(input("Ingrese el límite inferior del Tempo: "))
+        lim_sup = int(input("Ingrese el límite superior del Tempo: "))
+        n = len(genre.keys()) + 1
+        llave = str(n) + "- " + str(genero)
+        genre[llave] = (lim_inf, lim_sup)
+        genre_number[str(n)] = (lim_inf, lim_sup)
+        print ("El género " + str(genero) + " ha sido agregado con éxito!")
+        print(genre)
+        print(genre_number)
+
+    elif int(inputs[0]) == 6:  
+        lista_generos = []
+        generos = "1"
+        while len(generos) > 0: 
+            generos = (input("Ingrese el número de cada uno de los géneros a consultar: "))
+            if len(generos) != 0: 
+                lista_generos.append(generos)
+        dicc = controller.getEventsByRangeGenres(
+            analyzer, 'tempo', genre, lista_generos)    
+        print_genre(dicc)
 
     else:
         sys.exit(0)
 sys.exit(0)
+
+
+

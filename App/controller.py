@@ -85,6 +85,10 @@ def getEventsByRange(analyzer, criteria, initial, final):
     return model.getEventsByRange(analyzer, criteria, initial, final)
 
 
+def getEventsByRangeGenres(analyzer, criteria, dicc, list):
+    return model.getEventsByRangeGenres(analyzer, criteria, dicc, list)
+
+
 def getMusicToParty(analyzer, energyrange, danceabilityrange):
     return model.getTrcForTwoCriteria(
         analyzer, energyrange, 'energy', danceabilityrange, 'danceability')
