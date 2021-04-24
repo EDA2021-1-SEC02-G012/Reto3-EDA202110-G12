@@ -24,6 +24,7 @@ import config as cf
 import sys
 import controller
 import os
+from DISClib.ADT import map as mp
 from DISClib.ADT import list as lt
 assert cf
 
@@ -47,16 +48,6 @@ genre = {
     '7- r&b': (60, 80),
     '8- rock': (110, 140),
     '9- metal': (100, 160)}
-genre_number = {
-    '1': (60, 90),
-    '2': (70, 100),
-    '3': (90, 120),
-    '4': (85, 115),
-    '5': (120, 125),
-    '6': (100, 130),
-    '7': (60, 80),
-    '8': (110, 140),
-    '9': (100, 160)}
 
 
 def printMenu():
@@ -69,6 +60,7 @@ def printMenu():
     print("4- Encontrar música para estudiar")
     print("5- Agregar un género a la base de datos")
     print("6 - Encontrar música por género(s)")
+    print("7 - Encontrar género más escuchado dado un rango de horas")
     print("Presione cualquier otra tecla para salir")
 
 
@@ -111,21 +103,40 @@ def printfirstandlast5(arraylist):
                 'Tempo: ' + str(element.get('tempo')) + ", " +
                 'Acousticness: ' + str(element.get('acousticness')) + ", " +
                 'Energy: ' + str(element.get('energy')) + ", " +
-                'Mode: ' + str(element.get('mode')) +
-                'key: ' + str(element.get('key')) +
-                'Artist ID: ' + str(element.get('artist_id')) +
-                'Created at: ' + str(element.get('created_at')) +
+                'Mode: ' + str(element.get('mode')) + ", " +
+                'key: ' + str(element.get('key')) + ", " +
+                'Artist ID: ' + str(element.get('artist_id')) + ", " +
+                'Created at: ' + str(element.get('created_at')) + ", " +
                 'User ID: ' + str(element.get('user_id')))
         i -= 1
 
 
-def print_genre(dicc): 
+def printartists(artistsmap):
+    i = 1
+    keys = mp.keySet(artistsmap)
+    while i < 11:
+        print("Artist no. " + str(i) + " ID: " + str(lt.getElement(keys, i)))
+        i += 1
 
-    for genre in dicc: 
+
+def printgenre(dicc):
+    for genre in dicc:
         result = dicc[genre]
+        print('\n')
         print(genre)
         print('Registro de eventos Cargados: ' + str(result[0]))
         print('Artistas únicos Cargados: ' + str(result[1]))
+        printartists(result[4])
+
+
+def printfortotal(analyzer, ranges):
+    total_events = 0
+    for every_tuple in ranges:
+        events = controller.getEventsByRange(
+            analyzer, 'tempo', every_tuple[0], every_tuple[1])
+        total_events += events[0]
+    print('\n')
+    print("Registro de eventos totales: " + str(total_events))
 
 
 """
@@ -192,7 +203,7 @@ while True:
         print("Buscando en la base de datos ....")
         print(controller.getMusicToStudy(
             analyzer, instrumentalnessrange, temporange))
-    
+
     elif int(inputs[0]) == 5:
         genero = input("Ingrese el nombre del género musical: ")
         lim_inf = int(input("Ingrese el límite inferior del Tempo: "))
@@ -200,25 +211,31 @@ while True:
         n = len(genre.keys()) + 1
         llave = str(n) + "- " + str(genero)
         genre[llave] = (lim_inf, lim_sup)
-        genre_number[str(n)] = (lim_inf, lim_sup)
-        print ("El género " + str(genero) + " ha sido agregado con éxito!")
+        print("El género " + str(genero) + " ha sido agregado con éxito!")
         print(genre)
-        print(genre_number)
 
-    elif int(inputs[0]) == 6:  
+    elif int(inputs[0]) == 6:
         lista_generos = []
         generos = "1"
-        while len(generos) > 0: 
-            generos = (input("Ingrese el número de cada uno de los géneros a consultar: "))
-            if len(generos) != 0: 
+        while len(generos) > 0:
+            generos = (input(
+                "Ingrese el número de cada uno de los géneros a consultar: "))
+            if len(generos) != 0:
                 lista_generos.append(generos)
+        ranges = controller.getRanges(lista_generos, genre)
         dicc = controller.getEventsByRangeGenres(
-            analyzer, 'tempo', genre, lista_generos)    
-        print_genre(dicc)
+            analyzer, 'tempo', genre, lista_generos)
+        printgenre(dicc)
+        printfortotal(analyzer, ranges)
+
+    elif int(inputs[0]) == 7:
+        print("Ingrese la hora de inicio en formato 24h: (Ej. 12:34:56)")
+        tiempo_inicio = input("~")
+        print("Ingrese la hora final en formato 24h: (Ej. 12:34:56)")
+        tiempo_final = input("~")
+        result = controller.getGenresByTime(
+            analyzer, tiempo_inicio, tiempo_final)
 
     else:
         sys.exit(0)
 sys.exit(0)
-
-
-

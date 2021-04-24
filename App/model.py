@@ -51,7 +51,8 @@ def newAnalyzer():
                 'energy': None,
                 'danceability': None,
                 'valence': None,
-                'tempo': None
+                'tempo': None,
+                'created_at': None
                 }
 
     analyzer['listening_events'] = lt.newList(datastructure='ARRAY_LIST')
@@ -65,6 +66,7 @@ def newAnalyzer():
     analyzer['danceability'] = om.newMap(omaptype='RBT')
     analyzer['valence'] = om.newMap(omaptype='RBT')
     analyzer['tempo'] = om.newMap(omaptype='RBT')
+    analyzer['created_at'] = om.newMap(omaptype='RBT')
 
     return analyzer
 
@@ -100,6 +102,9 @@ def addEvent(analyzer, event):
     addEventOnOrderedRBTMap(
         analyzer, float(event['tempo']),
         (event['id'], event['artist_id'], event['track_id']), 'tempo')
+    addTimedEvent(
+        analyzer, event['created_at'],
+        (event['id'], event['artist_id'], event['track_id']), 'created_at')
 
 
 # Funciones para agregar un evento a un mapa tipo probing
@@ -126,6 +131,15 @@ def addEventOnOrderedRBTMap(analyzer, int_input, event, map_key):
         value = newSeparator(int_input, map_key)
         om.put(selected_map, int_input, value)
     lt.addLast(value['events'], event)
+
+
+def addTimedEvent(analyzer, int_input, event, map_key):
+    time = int_input.split(" ")
+    time = time[1].split(':')
+    time = int(time[0])*3600 + int(time[1])*60 + int(time[2])
+    addEventOnOrderedRBTMap(
+        analyzer, time,
+        event, map_key)
 
 
 def newSeparator(key, classifier):
@@ -177,11 +191,11 @@ def getEventsByRange(analyzer, criteria, initial, final):
 def getEventsByRangeGenres(analyzer, criteria, dicc, lista):
     resultado = {}
     llaves = []
-    for llave in dicc: 
+    for llave in dicc:
         llaves.append(llave[0])
-    for i in lista: 
-        for llave in dicc: 
-            if i in llave:  
+    for i in lista:
+        for llave in dicc:
+            if i in llave:
                 lim = dicc[llave]
                 lim_inf = lim[0]
                 lim_sup = lim[1]
@@ -219,6 +233,64 @@ def getTrcForTwoCriteria(analyzer, criteria1range, str1, criteria2range, str2):
 
     return (mp.size(listtracks), mp.size(listartists))
 
+
+def getRanges(lista_generos, dicc):
+    llaves = []
+    lim_inf = 1000
+    lim_sup = 0
+
+    for llave in dicc:
+        llaves.append(llave[0])
+    for i in lista_generos:
+        for llave in dicc:
+            if i in llave:
+                lim = dicc[llave]
+                if lim[0] <= lim_inf:
+                    lim_inf = lim[0]
+                if lim[1] >= lim_sup:
+                    lim_sup = lim[1]
+
+    ranges = []
+    n = 0
+    while n < lim_sup:
+        ranges.append(0)
+        n += 1
+
+    for x in lista_generos:
+        for llave in dicc:
+            if x in llave:
+                lim = dicc[llave]
+                h = lim[0]
+                while h < lim[1]:
+                    ranges[h] = 1
+                    h += 1
+
+    ranges.append(0)
+    resultados = []
+
+    for pos in range(0, len(ranges)):
+        if ranges[pos] == 1 and ranges[pos-1] == 0:
+            inferior = pos
+        elif ranges[pos] == 1 and ranges[pos+1] == 0:
+            superior = pos + 1
+            resultados.append((inferior, superior))
+
+    return resultados
+
+
+def getGenresByTime(analyzer, tiempo_inicio, tiempo_final):
+    realstarttime = tiempo_inicio.split(':')
+    realstarttime = (
+        int(realstarttime[0])*3600 + int(realstarttime[1])*60
+        + int(realstarttime[2]))
+    realfinishtime = tiempo_final.split(':')
+    realfinishtime = (
+        int(realfinishtime[0])*3600 + int(realfinishtime[1])*60
+        + int(realfinishtime[2]))
+    return getEventsByRange(
+        analyzer, 'created_at', realstarttime, realfinishtime)
+
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 
@@ -232,6 +304,3 @@ def compareDates(date1, date2):
         return 1
     else:
         return -1
-
-
-# Funciones de ordenamiento

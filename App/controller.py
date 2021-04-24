@@ -100,6 +100,14 @@ def getMusicToStudy(analyzer, instrumentalnessrange, temporange):
         instrumentalnessrange, 'instrumentalness', temporange, 'tempo')
 
 
+def getRanges(lista_generos, genre):
+    return model.getRanges(lista_generos, genre)
+
+
+def getGenresByTime(analyzer, tiempo_inicio, tiempo_final):
+    return model.getGenresByTime(analyzer, tiempo_inicio, tiempo_final)
+
+
 def eventsSize(analyzer):
     """
     Número de eventos cargados
