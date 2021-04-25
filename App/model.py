@@ -378,11 +378,17 @@ def getSentimentAnalysis(unique_ids, analyzer):
         vaderavg = 0
         for each_id in lt.iterator(me.getValue(ids)):
             hashtag = mp.get(hashtags, each_id)
-            vader = mp.get(vaders, me.getValue(hashtag)) # TODO AQUI ESTA EL PROBLEMA
-            vaderavg += float(me.getValue(vader))
-        n = lt.size(me.getValue(ids))
-        vaderavg = vaderavg/n
-        mp.put(tracks, llave, vaderavg)
+            hashtag_value = me.getValue(hashtag)
+            vader = mp.get(vaders, hashtag_value.lower())
+            if (vader is not None):
+                vader_val = me.getValue(vader)
+                if (vader_val is not None) and (vader_val != ''):
+                    vaderavg += float(vader_val)
+        
+        if vaderavg != 0.0:
+            n = lt.size(me.getValue(ids))
+            vaderavg = vaderavg/n
+            mp.put(tracks, llave, vaderavg)
 
     return tracks
 
