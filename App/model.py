@@ -325,34 +325,66 @@ def getTemposByTime(analyzer, tiempo_inicio, tiempo_final):
 
 def getBestGenre(minimap, genredicc):
     asqueroso_top = {}
-    bestgenre = None 
-    mayor = 0 
+    bestgenre = None
+    mayor = 0
     for genre in genredicc:
         lim = genredicc[genre]
         events = getTotalEventsByRangeGenre(
             minimap, 'tempo_map', lim[0], lim[1])
         asqueroso_top[genre] = events
-        if events > mayor: 
+        if events > mayor:
             mayor = events
-            bestgenre = genre 
+            bestgenre = genre
 
-    return asqueroso_top, bestgenre 
+    return asqueroso_top, bestgenre
 
-def getSentimentAnalysis(minimap, generos, bestgenre): 
+
+def getUniqueIDs(minimap, generos, bestgenre):
     lim = generos[bestgenre]
     lst = om.values(minimap['tempo_map'], lim[0], lim[1])
     tracks = mp.newMap(maptype='PROBING')
+    events = 0
 
     for lstevents in lt.iterator(lst):
+        events += lt.size(lstevents['events'])
         for soundtrackyourtimeline in lt.iterator(lstevents['events']):
-            unique_id = soundtrackyourtimeline['user_id'] 
-            + soundtrackyourtimeline['track_id'] 
-            + soundtrackyourtimeline['created_at']
-            mp.put(tracks, soundtrackyourtimeline['track_id'], unique_id)
+            unique_id = (
+                soundtrackyourtimeline['user_id']
+                + soundtrackyourtimeline['track_id']
+                + soundtrackyourtimeline['created_at'])
+            presence = mp.contains(
+                tracks, soundtrackyourtimeline['track_id'])
+            if presence:
+                ids = mp.get(tracks, soundtrackyourtimeline['track_id'])
+                ids = me.getValue(ids)
+                lt.addLast(ids, unique_id)
+            else:
+                hashtags = lt.newList('ARRAY_LIST')
+                lt.addLast(hashtags, unique_id)
+                mp.put(tracks, soundtrackyourtimeline['track_id'], hashtags)
 
     tracks_size = mp.size(tracks)
 
-    return tracks, tracks_size 
+    return tracks, tracks_size, events
+
+
+def getSentimentAnalysis(unique_ids, analyzer):
+    hashtags = analyzer['hashtags']
+    vaders = analyzer['vaders']
+    llaves = mp.keySet(unique_ids[0])
+    tracks = mp.newMap(maptype="PROBING")
+    for llave in lt.iterator(llaves):
+        ids = mp.get(unique_ids[0], llave)
+        vaderavg = 0
+        for each_id in lt.iterator(me.getValue(ids)):
+            hashtag = mp.get(hashtags, each_id)
+            vader = mp.get(vaders, me.getValue(hashtag)) # TODO AQUI ESTA EL PROBLEMA
+            vaderavg += float(me.getValue(vader))
+        n = lt.size(me.getValue(ids))
+        vaderavg = vaderavg/n
+        mp.put(tracks, llave, vaderavg)
+
+    return tracks
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
