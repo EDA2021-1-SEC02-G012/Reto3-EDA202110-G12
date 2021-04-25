@@ -44,7 +44,7 @@ def init():
 # Inicialización del Catálogo
 
 
-def loadData(analyzer, file):
+def loadData(analyzer, file1, file2, file3):
     """
     Carga los datos de los archivos CSV en el modelo
     """
@@ -55,7 +55,9 @@ def loadData(analyzer, file):
     start_time = getTime()
     start_memory = getMemory()
 
-    loadEvents(analyzer, file)
+    loadEvents(analyzer, file1)
+    loadHashtags(analyzer, file2)
+    loadVader(analyzer, file3)
 
     stop_memory = getMemory()
     stop_time = getTime()
@@ -75,6 +77,24 @@ def loadEvents(analyzer, file):
                                 delimiter=",")
     for event in input_file:
         model.addEvent(analyzer, event)
+
+
+def loadHashtags(analyzer, file):
+    analysis_file = cf.data_dir + file
+    input_file = csv.DictReader(open(analysis_file, encoding="utf-8"),
+                                delimiter=",")
+    for event in input_file:
+        key = event['user_id'] + event['track_id'] + event['created_at']
+        model.addOnMap(analyzer, event['hashtag'], key, 'hashtags')
+
+
+def loadVader(analyzer, file):
+    analysis_file = cf.data_dir + file
+    input_file = csv.DictReader(open(analysis_file, encoding="utf-8"),
+                                delimiter=",")
+    for vader in input_file:
+        model.addOnMap(
+            analyzer, vader['vader_avg'], vader['hashtag'], 'vaders')
 
 # Funciones de ordenamiento
 
@@ -100,12 +120,16 @@ def getMusicToStudy(analyzer, instrumentalnessrange, temporange):
         instrumentalnessrange, 'instrumentalness', temporange, 'tempo')
 
 
+def getBestGenre(minimap, genredicc):
+    return model.getBestGenre(minimap, genredicc)
+
+
 def getRanges(lista_generos, genre):
     return model.getRanges(lista_generos, genre)
 
 
-def getGenresByTime(analyzer, tiempo_inicio, tiempo_final):
-    return model.getGenresByTime(analyzer, tiempo_inicio, tiempo_final)
+def getTemposByTime(analyzer, tiempo_inicio, tiempo_final):
+    return model.getTemposByTime(analyzer, tiempo_inicio, tiempo_final)
 
 
 def eventsSize(analyzer):

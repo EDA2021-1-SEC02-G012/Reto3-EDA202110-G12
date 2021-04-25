@@ -36,7 +36,10 @@ operación seleccionada.
 """
 
 analyzer = None
-events_analysis_file = 'context_content_features-small.csv'
+
+events_analysis_file = 'subsamples-small/context_content_features-small.csv'
+sentiment_values = 'subsamples-small/sentiment_values.csv'
+hashtag_file = 'subsamples-small/user_track_hashtag_timestamp-small.csv'
 rows, columns = os.popen('stty size', 'r').read().split()
 genre = {
     '1- reggae': (60, 90),
@@ -62,6 +65,20 @@ def printMenu():
     print("6 - Encontrar música por género(s)")
     print("7 - Encontrar género más escuchado dado un rango de horas")
     print("Presione cualquier otra tecla para salir")
+
+
+def printTopGenres(dicc):
+    events = dicc.values()
+    events = sorted(events, reverse=True)
+    top = 1
+    for event in events:
+        for genre in dicc:
+            if event == dicc[genre]:
+                print(
+                    'TOP ' + str(top) + ': '
+                    + genre[2:] + ' with '
+                    + str(event) + ' repetitions.')
+                top += 1
 
 
 def printfirstandlast5(arraylist):
@@ -149,7 +166,8 @@ while True:
     if int(inputs[0]) == 1:
         analyzer = controller.init()
         print("Cargando información de los archivos ....")
-        answer = controller.loadData(analyzer, events_analysis_file)
+        answer = controller.loadData(
+            analyzer, events_analysis_file, hashtag_file, sentiment_values)
         print('Registro de eventos Cargados: ' + str(controller.eventsSize(
             analyzer)))
         print('Artistas únicos Cargados: ' + str(controller.artistsSize(
@@ -233,8 +251,10 @@ while True:
         tiempo_inicio = input("~")
         print("Ingrese la hora final en formato 24h: (Ej. 12:34:56)")
         tiempo_final = input("~")
-        result = controller.getGenresByTime(
+        result = controller.getTemposByTime(
             analyzer, tiempo_inicio, tiempo_final)
+        bestgenre = controller.getBestGenre(result, genre)
+        printTopGenres(bestgenre)
 
     else:
         sys.exit(0)

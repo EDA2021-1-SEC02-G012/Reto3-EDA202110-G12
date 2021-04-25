@@ -52,7 +52,9 @@ def newAnalyzer():
                 'danceability': None,
                 'valence': None,
                 'tempo': None,
-                'created_at': None
+                'created_at': None,
+                'hashtags': None,
+                'vaders': None
                 }
 
     analyzer['listening_events'] = lt.newList(datastructure='ARRAY_LIST')
@@ -67,6 +69,8 @@ def newAnalyzer():
     analyzer['valence'] = om.newMap(omaptype='RBT')
     analyzer['tempo'] = om.newMap(omaptype='RBT')
     analyzer['created_at'] = om.newMap(omaptype='RBT')
+    analyzer['hashtags'] = mp.newMap(maptype='PROBING')
+    analyzer['vaders'] = mp.newMap(maptype='PROBING')
 
     return analyzer
 
@@ -103,8 +107,11 @@ def addEvent(analyzer, event):
         analyzer, float(event['tempo']),
         (event['id'], event['artist_id'], event['track_id']), 'tempo')
     addTimedEvent(
-        analyzer, event['created_at'],
-        (event['id'], event['artist_id'], event['track_id']), 'created_at')
+        analyzer, event['created_at'], event, 'created_at')
+
+
+def addOnMap(analyzer, event, key, map_name):
+    mp.put(analyzer[map_name], key, event)
 
 
 # Funciones para agregar un evento a un mapa tipo probing
@@ -186,6 +193,31 @@ def getEventsByRange(analyzer, criteria, initial, final):
     tracks_size = mp.size(tracks)
 
     return events, artists_size, tracks_size, artists, tracks
+
+
+def getEventsByRangeTempoReturn(analyzer, criteria, initial, final):
+    lst = om.values(analyzer[criteria], initial, final)
+    minimap = {'tempo_map': None}
+    minimap['tempo_map'] = om.newMap(omaptype='RBT')
+
+    for lstevents in lt.iterator(lst):
+        for soundtrackyourtimeline in lt.iterator(lstevents['events']):
+            addEventOnOrderedRBTMap(
+                minimap,
+                float(soundtrackyourtimeline['tempo']),
+                soundtrackyourtimeline, 'tempo_map')
+
+    return minimap
+
+
+def getTotalEventsByRangeGenre(analyzer, criteria, initial, final):
+    lst = om.values(analyzer[criteria], initial, final)
+    events = 0
+
+    for lstevents in lt.iterator(lst):
+        events += lt.size(lstevents['events'])
+
+    return events
 
 
 def getEventsByRangeGenres(analyzer, criteria, dicc, lista):
@@ -278,7 +310,7 @@ def getRanges(lista_generos, dicc):
     return resultados
 
 
-def getGenresByTime(analyzer, tiempo_inicio, tiempo_final):
+def getTemposByTime(analyzer, tiempo_inicio, tiempo_final):
     realstarttime = tiempo_inicio.split(':')
     realstarttime = (
         int(realstarttime[0])*3600 + int(realstarttime[1])*60
@@ -287,9 +319,18 @@ def getGenresByTime(analyzer, tiempo_inicio, tiempo_final):
     realfinishtime = (
         int(realfinishtime[0])*3600 + int(realfinishtime[1])*60
         + int(realfinishtime[2]))
-    return getEventsByRange(
+    return getEventsByRangeTempoReturn(
         analyzer, 'created_at', realstarttime, realfinishtime)
 
+
+def getBestGenre(minimap, genredicc):
+    asqueroso_top = {}
+    for genre in genredicc:
+        lim = genredicc[genre]
+        events = getTotalEventsByRangeGenre(
+            minimap, 'tempo_map', lim[0], lim[1])
+        asqueroso_top[genre] = events
+    return asqueroso_top
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
