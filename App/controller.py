@@ -131,6 +131,8 @@ def getRanges(lista_generos, genre):
 def getTemposByTime(analyzer, tiempo_inicio, tiempo_final):
     return model.getTemposByTime(analyzer, tiempo_inicio, tiempo_final)
 
+def getSentimentAnalysis(minimap, generos, bestgenre)
+    return model.getSentimentAnalysis(minimap, generos, bestgenre) 
 
 def eventsSize(analyzer):
     """

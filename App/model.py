@@ -325,12 +325,34 @@ def getTemposByTime(analyzer, tiempo_inicio, tiempo_final):
 
 def getBestGenre(minimap, genredicc):
     asqueroso_top = {}
+    bestgenre = None 
+    mayor = 0 
     for genre in genredicc:
         lim = genredicc[genre]
         events = getTotalEventsByRangeGenre(
             minimap, 'tempo_map', lim[0], lim[1])
         asqueroso_top[genre] = events
-    return asqueroso_top
+        if events > mayor: 
+            mayor = events
+            bestgenre = genre 
+
+    return asqueroso_top, bestgenre 
+
+def getSentimentAnalysis(minimap, generos, bestgenre): 
+    lim = generos[bestgenre]
+    lst = om.values(minimap['tempo_map'], lim[0], lim[1])
+    tracks = mp.newMap(maptype='PROBING')
+
+    for lstevents in lt.iterator(lst):
+        for soundtrackyourtimeline in lt.iterator(lstevents['events']):
+            unique_id = soundtrackyourtimeline['user_id'] 
+            + soundtrackyourtimeline['track_id'] 
+            + soundtrackyourtimeline['created_at']
+            mp.put(tracks, soundtrackyourtimeline['track_id'], unique_id)
+
+    tracks_size = mp.size(tracks)
+
+    return tracks, tracks_size 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
