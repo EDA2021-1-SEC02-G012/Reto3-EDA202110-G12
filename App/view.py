@@ -255,8 +255,10 @@ while True:
             analyzer, tiempo_inicio, tiempo_final)
         bestgenre = controller.getBestGenre(result, genre)
         printTopGenres(bestgenre[0])
-        sentiment_analysis = controller.getSentimentAnalysis(
+        uniqueIDs = controller.getUniqueIDs(
             result, genre, bestgenre[1])
+        result2 = controller.getSentimentAnalysis(uniqueIDs, analyzer)
+        print(result2)
 
     else:
         sys.exit(0)
