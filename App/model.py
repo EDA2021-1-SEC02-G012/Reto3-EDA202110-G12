@@ -83,29 +83,29 @@ def addEvent(analyzer, event):
     addEventOnProbingMap(analyzer, event['track_id'], event['id'], 'tracks')
     addEventOnOrderedRBTMap(
         analyzer, float(event['instrumentalness']),
-        (event['id'], event['artist_id'], event['track_id']),
+        event,
         'instrumentalness')
     addEventOnOrderedRBTMap(
         analyzer, float(event['acousticness']),
-        (event['id'], event['artist_id'], event['track_id']), 'acousticness')
+        event, 'acousticness')
     addEventOnOrderedRBTMap(
         analyzer, float(event['liveness']),
-        (event['id'], event['artist_id'], event['track_id']), 'liveness')
+        event, 'liveness')
     addEventOnOrderedRBTMap(
         analyzer, float(event['speechiness']),
-        (event['id'], event['artist_id'], event['track_id']), 'speechiness')
+        event, 'speechiness')
     addEventOnOrderedRBTMap(
         analyzer, float(event['energy']),
-        (event['id'], event['artist_id'], event['track_id']), 'energy')
+        event, 'energy')
     addEventOnOrderedRBTMap(
         analyzer, float(event['danceability']),
-        (event['id'], event['artist_id'], event['track_id']), 'danceability')
+        event, 'danceability')
     addEventOnOrderedRBTMap(
         analyzer, float(event['valence']),
-        (event['id'], event['artist_id'], event['track_id']), 'valence')
+        event, 'valence')
     addEventOnOrderedRBTMap(
         analyzer, float(event['tempo']),
-        (event['id'], event['artist_id'], event['track_id']), 'tempo')
+        event, 'tempo')
     addTimedEvent(
         analyzer, event['created_at'], event, 'created_at')
 
@@ -186,8 +186,8 @@ def getEventsByRange(analyzer, criteria, initial, final):
     for lstevents in lt.iterator(lst):
         events += lt.size(lstevents['events'])
         for soundtrackyourtimeline in lt.iterator(lstevents['events']):
-            mp.put(artists, soundtrackyourtimeline[1], 1)
-            mp.put(tracks, soundtrackyourtimeline[2], 1)
+            mp.put(artists, soundtrackyourtimeline['artist_id'], 1)
+            mp.put(tracks, soundtrackyourtimeline['track_id'], 1)
 
     artists_size = mp.size(artists)
     tracks_size = mp.size(tracks)
@@ -238,32 +238,20 @@ def getEventsByRangeGenres(analyzer, criteria, dicc, lista):
 
 
 def getTrcForTwoCriteria(analyzer, criteria1range, str1, criteria2range, str2):
-    listtracks = mp.newMap(maptype='PROBING')
-    listartists = mp.newMap(maptype='PROBING')
-
-    criteria1 = getEventsByRange(
-        analyzer, str1, criteria1range[0], criteria1range[1])
-    criteria1trackslist = mp.keySet(criteria1[4])
-    criteria1artistslist = mp.keySet(criteria1[3])
-
-    criteria2 = getEventsByRange(
-        analyzer, str2, criteria2range[0], criteria2range[1])
-    criteria2trackslist = mp.keySet(criteria2[4])
-    criteria2artistslist = mp.keySet(criteria2[3])
-
-    for key in lt.iterator(criteria1trackslist):
-        mp.put(listtracks, key, 1)
-
-    for key in lt.iterator(criteria1artistslist):
-        mp.put(listartists, key, 1)
-
-    for key in lt.iterator(criteria2trackslist):
-        mp.put(listtracks, key, 1)
-
-    for key in lt.iterator(criteria2artistslist):
-        mp.put(listartists, key, 1)
-
-    return (mp.size(listtracks), mp.size(listartists))
+    criteria1 = om.values(analyzer[str1], criteria1range[0], criteria1range[1])
+    submap = {'events': None}
+    submap[str2] = om.newMap(omaptype='RBT')
+    for eventO in lt.iterator(criteria1):
+        for event0 in lt.iterator(eventO['events']):
+            addEventOnOrderedRBTMap(submap, float(event0[str2]), event0, str2)
+    result = om.values(submap[str2], criteria2range[0], criteria2range[1])
+    artists = mp.newMap(maptype='PROBING')
+    tracks = mp.newMap(maptype='PROBING')
+    for event1 in lt.iterator(result):
+        for eventi in lt.iterator(event1['events']):
+            mp.put(artists, eventi['artist_id'], 1)
+            mp.put(tracks, eventi['track_id'], 1)
+    return (mp.size(artists), mp.size(tracks))
 
 
 def getRanges(lista_generos, dicc):
@@ -342,7 +330,8 @@ def getBestGenre(minimap, genredicc):
 def getUniqueIDs(minimap, generos, bestgenre):
     lim = generos[bestgenre]
     lst = om.values(minimap['tempo_map'], lim[0], lim[1])
-    tracks = mp.newMap(maptype='PROBING')
+    tracks = {'data': None}
+    tracks['data'] = mp.newMap(maptype='PROBING')
     events = 0
 
     for lstevents in lt.iterator(lst):
@@ -352,20 +341,12 @@ def getUniqueIDs(minimap, generos, bestgenre):
                 soundtrackyourtimeline['user_id']
                 + soundtrackyourtimeline['track_id']
                 + soundtrackyourtimeline['created_at'])
-            presence = mp.contains(
-                tracks, soundtrackyourtimeline['track_id'])
-            if presence:
-                ids = mp.get(tracks, soundtrackyourtimeline['track_id'])
-                ids = me.getValue(ids)
-                lt.addLast(ids, unique_id)
-            else:
-                hashtags = lt.newList('ARRAY_LIST')
-                lt.addLast(hashtags, unique_id)
-                mp.put(tracks, soundtrackyourtimeline['track_id'], hashtags)
+            addEventOnProbingMap(
+                tracks, soundtrackyourtimeline['track_id'], unique_id, 'data')
 
-    tracks_size = mp.size(tracks)
+    tracks_size = mp.size(tracks['data'])
 
-    return tracks, tracks_size, events
+    return tracks['data'], tracks_size, events
 
 
 def getSentimentAnalysis(unique_ids, analyzer):
@@ -376,7 +357,8 @@ def getSentimentAnalysis(unique_ids, analyzer):
     for llave in lt.iterator(llaves):
         ids = mp.get(unique_ids[0], llave)
         vaderavg = 0
-        for each_id in lt.iterator(me.getValue(ids)):
+        lista = me.getValue(ids)
+        for each_id in lt.iterator(lista['events']):
             hashtag = mp.get(hashtags, each_id)
             hashtag_value = me.getValue(hashtag)
             vader = mp.get(vaders, hashtag_value.lower())
@@ -384,9 +366,10 @@ def getSentimentAnalysis(unique_ids, analyzer):
                 vader_val = me.getValue(vader)
                 if (vader_val is not None) and (vader_val != ''):
                     vaderavg += float(vader_val)
-        
+
         if vaderavg != 0.0:
-            n = lt.size(me.getValue(ids))
+            listaX = me.getValue(ids)
+            n = lt.size(listaX['events'])
             vaderavg = vaderavg/n
             mp.put(tracks, llave, vaderavg)
 

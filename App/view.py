@@ -178,8 +178,11 @@ while True:
         print('Primeros y últimos 5 cargados, respectivamente: ')
         printfirstandlast5(analyzer)
         print('\n')
-        print("Tiempo [ms]: ", f"{answer[0]:.3f}", "  ||  ",
-              "Memoria [kB]: ", f"{answer[1]:.3f}")
+        print(
+            "Tiempo [ms]: ",
+            f"{answer[0]:.3f}", "  ||  ",
+            "Memoria [kB]: ",
+            f"{answer[1]:.3f}")
 
     elif int(inputs[0]) == 2:
         criteria = input("Ingrese el criterio a evaluar: ")
@@ -192,6 +195,7 @@ while True:
         print('Artistas únicos Cargados: ' + str(result[1]))
 
     elif int(inputs[0]) == 3:
+        # TODO Implementar lo se pistas aleatorias
         initialenergy = float(input(
             "Ingrese el límite inferior para la energía: "))
         finalenergy = float(input(
@@ -207,6 +211,7 @@ while True:
             analyzer, energyrange, danceabilityrange))
 
     elif int(inputs[0]) == 4:
+        # TODO Implementar lo se pistas aleatorias
         initialinstrumentalness = float(input(
             "Ingrese el límite inferior para la instrumentalidad: "))
         finalinstrumentalness = float(input(
@@ -258,7 +263,7 @@ while True:
         uniqueIDs = controller.getUniqueIDs(
             result, genre, bestgenre[1])
         result2 = controller.getSentimentAnalysis(uniqueIDs, analyzer)
-        print(result2)
+        print(mp.size(result2))
 
     else:
         sys.exit(0)
