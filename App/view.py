@@ -24,8 +24,10 @@ import config as cf
 import sys
 import controller
 import os
+import random
 from DISClib.ADT import map as mp
 from DISClib.ADT import list as lt
+from DISClib.DataStructures import mapentry as me
 assert cf
 
 """
@@ -62,8 +64,8 @@ def printMenu():
     print("3- Encontrar música para festejar")
     print("4- Encontrar música para estudiar")
     print("5- Agregar un género a la base de datos")
-    print("6 - Encontrar música por género(s)")
-    print("7 - Encontrar género más escuchado dado un rango de horas")
+    print("6- Encontrar música por género(s)")
+    print("7- Encontrar género más escuchado dado un rango de horas")
     print("Presione cualquier otra tecla para salir")
 
 
@@ -74,9 +76,10 @@ def printTopGenres(dicc):
     for event in events:
         for genre in dicc:
             if event == dicc[genre]:
+                string = genre.split("- ")
                 print(
                     'TOP ' + str(top) + ': '
-                    + genre[2:] + ' with '
+                    + string[1] + ' with '
                     + str(event) + ' repetitions.')
                 top += 1
 
@@ -128,6 +131,21 @@ def printfirstandlast5(arraylist):
         i -= 1
 
 
+def printRandom5(mapa, str1, str2):
+    lista = mp.keySet(mapa)
+    listsize = lt.size(lista)
+    sample = random.sample(range(listsize), 5)
+    n = 0
+    for num in sample:
+        n += 1
+        element = lt.getElement(lista, num)
+        thing = mp.get(mapa, element)
+        value = me.getValue(thing)
+        print(
+            "Track:", n, str(element),
+            str1, ':', value[0], str2, ':', value[1])
+
+
 def printartists(artistsmap):
     i = 1
     keys = mp.keySet(artistsmap)
@@ -153,7 +171,12 @@ def printfortotal(analyzer, ranges):
             analyzer, 'tempo', every_tuple[0], every_tuple[1])
         total_events += events[0]
     print('\n')
-    print("Registro de eventos totales: " + str(total_events))
+    print("Registro de eventos únicos totales: " + str(total_events))
+
+
+def printgenresdict(dicc):
+    for key in dicc.keys():
+        print(key, ' Rango de tempo: ', dicc[key])
 
 
 """
@@ -195,7 +218,6 @@ while True:
         print('Artistas únicos Cargados: ' + str(result[1]))
 
     elif int(inputs[0]) == 3:
-        # TODO Implementar lo se pistas aleatorias
         initialenergy = float(input(
             "Ingrese el límite inferior para la energía: "))
         finalenergy = float(input(
@@ -207,11 +229,13 @@ while True:
             "Ingrese el límite superior para la perreabilidad: "))
         danceabilityrange = (initialdanceability, finaldanceability)
         print("Buscando en la base de datos ....")
-        print(controller.getMusicToParty(
-            analyzer, energyrange, danceabilityrange))
+        result = controller.getMusicToParty(
+            analyzer, energyrange, danceabilityrange)
+        print('Artistas únicos Cargados:', str(result[0]))
+        print('Tracks únicas Cargadas:', str(result[1]))
+        printRandom5(result[2], 'energy', 'danceability')
 
     elif int(inputs[0]) == 4:
-        # TODO Implementar lo se pistas aleatorias
         initialinstrumentalness = float(input(
             "Ingrese el límite inferior para la instrumentalidad: "))
         finalinstrumentalness = float(input(
@@ -224,8 +248,11 @@ while True:
             "Ingrese el límite superior para el tempo: "))
         temporange = (initialtempo, finaltempo)
         print("Buscando en la base de datos ....")
-        print(controller.getMusicToStudy(
-            analyzer, instrumentalnessrange, temporange))
+        result = controller.getMusicToStudy(
+            analyzer, instrumentalnessrange, temporange)
+        print('Artistas únicos Cargados:', str(result[0]))
+        print('Tracks únicas Cargadas:', str(result[1]))
+        printRandom5(result[2], 'instrumentalness', 'tempo')
 
     elif int(inputs[0]) == 5:
         genero = input("Ingrese el nombre del género musical: ")
@@ -236,13 +263,18 @@ while True:
         genre[llave] = (lim_inf, lim_sup)
         print("El género " + str(genero) + " ha sido agregado con éxito!")
         print(genre)
+        print('Ésta es la base de datos actualizada:')
+        printgenresdict(genre)
 
     elif int(inputs[0]) == 6:
+        print('Éstos son los géneros disponibles para consulta:')
+        printgenresdict(genre)
         lista_generos = []
         generos = "1"
+        print("Ingrese el número de cada uno de los géneros a consultar.")
+        print("Para dejar de agregar géneros a la búsqueda, presione enter.")
         while len(generos) > 0:
-            generos = (input(
-                "Ingrese el número de cada uno de los géneros a consultar: "))
+            generos = input('~')
             if len(generos) != 0:
                 lista_generos.append(generos)
         ranges = controller.getRanges(lista_generos, genre)

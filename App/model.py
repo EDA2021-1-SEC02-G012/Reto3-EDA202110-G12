@@ -250,8 +250,10 @@ def getTrcForTwoCriteria(analyzer, criteria1range, str1, criteria2range, str2):
     for event1 in lt.iterator(result):
         for eventi in lt.iterator(event1['events']):
             mp.put(artists, eventi['artist_id'], 1)
-            mp.put(tracks, eventi['track_id'], 1)
-    return (mp.size(artists), mp.size(tracks))
+            mp.put(
+                tracks, eventi['track_id'],
+                (eventi[str1], eventi[str2]))
+    return (mp.size(artists), mp.size(tracks), tracks)
 
 
 def getRanges(lista_generos, dicc):
@@ -362,6 +364,7 @@ def getSentimentAnalysis(unique_ids, analyzer):
             hashtag = mp.get(hashtags, each_id)
             hashtag_value = me.getValue(hashtag)
             vader = mp.get(vaders, hashtag_value.lower())
+            # Santiago no puso lower :)
             if (vader is not None):
                 vader_val = me.getValue(vader)
                 if (vader_val is not None) and (vader_val != ''):
