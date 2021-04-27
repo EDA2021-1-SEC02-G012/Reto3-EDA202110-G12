@@ -18,6 +18,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
+ * Jose Luis Tavera Ruiz
+ * Juan Diego Yepes
  """
 
 import config as cf
@@ -72,6 +74,9 @@ def loadData(analyzer, file1, file2, file3):
 
 
 def loadEvents(analyzer, file):
+    """
+    Itera cada elemento del archivo csv
+    """
     analysis_file = cf.data_dir + file
     input_file = csv.DictReader(open(analysis_file, encoding="utf-8"),
                                 delimiter=",")
@@ -80,6 +85,9 @@ def loadEvents(analyzer, file):
 
 
 def loadHashtags(analyzer, file):
+    """
+    Itera cada elemento del archivo csv
+    """
     analysis_file = cf.data_dir + file
     input_file = csv.DictReader(open(analysis_file, encoding="utf-8"),
                                 delimiter=",")
@@ -89,6 +97,9 @@ def loadHashtags(analyzer, file):
 
 
 def loadVader(analyzer, file):
+    """
+    Itera cada elemento del archivo csv
+    """
     analysis_file = cf.data_dir + file
     input_file = csv.DictReader(open(analysis_file, encoding="utf-8"),
                                 delimiter=",")
@@ -102,41 +113,68 @@ def loadVader(analyzer, file):
 
 
 def getEventsByRange(analyzer, criteria, initial, final):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getEventsByRange(analyzer, criteria, initial, final)
 
 
 def getEventsByRangeGenres(analyzer, criteria, dicc, list):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getEventsByRangeGenres(analyzer, criteria, dicc, list)
 
 
 def getMusicToParty(analyzer, energyrange, danceabilityrange):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getTrcForTwoCriteria(
         analyzer, energyrange, 'energy', danceabilityrange, 'danceability')
 
 
 def getMusicToStudy(analyzer, instrumentalnessrange, temporange):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getTrcForTwoCriteria(
         analyzer,
         instrumentalnessrange, 'instrumentalness', temporange, 'tempo')
 
 
 def getBestGenre(minimap, genredicc):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getBestGenre(minimap, genredicc)
 
 
 def getRanges(lista_generos, genre):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getRanges(lista_generos, genre)
 
 
 def getTemposByTime(analyzer, tiempo_inicio, tiempo_final):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getTemposByTime(analyzer, tiempo_inicio, tiempo_final)
 
 
 def getUniqueIDs(minimap, generos, bestgenre):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getUniqueIDs(minimap, generos, bestgenre)
 
 
 def getSentimentAnalysis(unique_ids, analyzer):
+    '''
+    Función puente entre las funciones homónimas entre el model y view
+    '''
     return model.getSentimentAnalysis(unique_ids, analyzer)
 
 

@@ -18,6 +18,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
+ * Jose Luis Tavera Ruiz
+ * Juan Diego Yepes
  """
 
 import config as cf
@@ -70,6 +72,9 @@ def printMenu():
 
 
 def printTopGenres(dicc):
+    '''
+    Imprime los géneros iterando el diccionario
+    '''
     events = dicc.values()
     events = sorted(events, reverse=True)
     top = 1
@@ -85,6 +90,9 @@ def printTopGenres(dicc):
 
 
 def printfirstandlast5(arraylist):
+    '''
+    Imprime últimos y primeros 5 eventos cargados
+    '''
     printlist = arraylist['listening_events']
     i = 1
     listsize = lt.size(printlist)
@@ -132,6 +140,9 @@ def printfirstandlast5(arraylist):
 
 
 def printRandom5(mapa, str1, str2):
+    '''
+    Imprime 5 eventos random dentro del mapa
+    '''
     lista = mp.keySet(mapa)
     listsize = lt.size(lista)
     sample = random.sample(range(listsize), 5)
@@ -147,6 +158,9 @@ def printRandom5(mapa, str1, str2):
 
 
 def printartists(artistsmap):
+    '''
+    Imprime los artistas en el mapa
+    '''
     i = 1
     keys = mp.keySet(artistsmap)
     while i < 11:
@@ -155,6 +169,9 @@ def printartists(artistsmap):
 
 
 def printgenre(dicc):
+    '''
+    Imprime para cada género información solicitada
+    '''
     for genre in dicc:
         result = dicc[genre]
         print('\n')
@@ -165,6 +182,9 @@ def printgenre(dicc):
 
 
 def printfortotal(analyzer, ranges):
+    '''
+    Imprime los eventos únicos totales
+    '''
     total_events = 0
     for every_tuple in ranges:
         events = controller.getEventsByRange(
@@ -175,6 +195,9 @@ def printfortotal(analyzer, ranges):
 
 
 def printgenresdict(dicc):
+    '''
+    Imprime el diccionario de géneros
+    '''
     for key in dicc.keys():
         print(key, ' Rango de tempo: ', dicc[key])
 

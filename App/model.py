@@ -22,6 +22,8 @@
  * Contribuciones:
  *
  * Dario Correal - Version inicial
+ * Jose Luis Tavera Ruiz
+ * Juan Diego Yepes
  """
 
 
@@ -78,6 +80,10 @@ def newAnalyzer():
 # Funciones para agregar informacion al catalogo
 
 def addEvent(analyzer, event):
+    '''
+    Agrega individualmente el evento al analyzer, en
+    cada uno de sus mapas
+    '''
     lt.addLast(analyzer['listening_events'], event)
     addEventOnProbingMap(analyzer, event['artist_id'], event['id'], 'artists')
     addEventOnProbingMap(analyzer, event['track_id'], event['id'], 'tracks')
@@ -111,12 +117,22 @@ def addEvent(analyzer, event):
 
 
 def addOnMap(analyzer, event, key, map_name):
+    '''
+    Agrega los hashtags y los vaders a sus mapas individuales
+    '''
     mp.put(analyzer[map_name], key, event)
 
 
-# Funciones para agregar un evento a un mapa tipo probing
-
 def addEventOnProbingMap(analyzer, int_input, event, map_key):
+    """
+    La función de addEventOnProbingMap() adiciona el video al mapa
+    tipo PROBING que se ha seleccionado.
+    Args:
+        analyzer: Analizador de eventos
+        int_input: Llave a analizar
+        video: Video a añadir
+        map_key: Especifica cuál mapa
+    """
     selected_map = analyzer[map_key]
     existkey = mp.contains(selected_map, int_input)
     if existkey:
@@ -129,6 +145,15 @@ def addEventOnProbingMap(analyzer, int_input, event, map_key):
 
 
 def addEventOnOrderedRBTMap(analyzer, int_input, event, map_key):
+    """
+    La función de addEventOnOrderedRBTMap() adiciona el video al árbol
+    tipo RBT que se ha seleccionado.
+    Args:
+        analyzer: Analizador de eventos
+        int_input: Llave a analizar
+        video: Video a añadir
+        map_key: Especifica cuál mapa
+    """
     selected_map = analyzer[map_key]
     existkey = om.contains(selected_map, int_input)
     if existkey:
@@ -141,6 +166,11 @@ def addEventOnOrderedRBTMap(analyzer, int_input, event, map_key):
 
 
 def addTimedEvent(analyzer, int_input, event, map_key):
+    '''
+    Adiciona un evento a un árbol tipo RBT usando el
+    tiempo de creación del evento, con los segundos como
+    llave
+    '''
     time = int_input.split(" ")
     time = time[1].split(':')
     time = int(time[0])*3600 + int(time[1])*60 + int(time[2])
@@ -166,18 +196,39 @@ def newSeparator(key, classifier):
 # Funciones de consulta
 
 def eventsSize(analyzer):
+    '''
+    Retorna el tamaño de la lista de eventos
+    '''
     return lt.size(analyzer['listening_events'])
 
 
 def artistsSize(analyzer):
+    '''
+    Retorna el tamaño del mapa de artistas,
+    para saber los artistas únicos cargados
+    '''
     return mp.size(analyzer['artists'])
 
 
 def tracksSize(analyzer):
+    '''
+    Retorna el tamaño del mapa de tracks, para
+    saber los tracks únicos cargados
+    '''
     return mp.size(analyzer['tracks'])
 
 
 def getEventsByRange(analyzer, criteria, initial, final):
+    '''
+    Retorna los varias características de los
+    eventos dado un criterio y rango en el mismo,
+    buscándolos en un árbol
+    Args:
+        analyzer: Analizador de eventos
+        criteria: Llave del analyzer a analizar
+        initial: Inicio del rango
+        final: Fin del rango
+    '''
     lst = om.values(analyzer[criteria], initial, final)
     events = 0
     artists = mp.newMap(maptype='PROBING')
@@ -196,6 +247,16 @@ def getEventsByRange(analyzer, criteria, initial, final):
 
 
 def getEventsByRangeTempoReturn(analyzer, criteria, initial, final):
+    '''
+    Retorna el tempo de los eventos organizados en un arbol RBT
+    dado un criterio y rango en el mismo,
+    buscándolos en un árbol
+    Args:
+        analyzer: Analizador de eventos
+        criteria: Llave del analyzer a analizar
+        initial: Inicio del rango
+        final: Fin del rango
+    '''
     lst = om.values(analyzer[criteria], initial, final)
     minimap = {'tempo_map': None}
     minimap['tempo_map'] = om.newMap(omaptype='RBT')
@@ -211,6 +272,14 @@ def getEventsByRangeTempoReturn(analyzer, criteria, initial, final):
 
 
 def getTotalEventsByRangeGenre(analyzer, criteria, initial, final):
+    '''
+    Retorna la suma de los eventos dentro de un rango específico
+    Args:
+        analyzer: Analizador de eventos
+        criteria: Llave del analyzer a analizar
+        initial: Inicio del rango
+        final: Fin del rango
+    '''
     lst = om.values(analyzer[criteria], initial, final)
     events = 0
 
@@ -221,6 +290,15 @@ def getTotalEventsByRangeGenre(analyzer, criteria, initial, final):
 
 
 def getEventsByRangeGenres(analyzer, criteria, dicc, lista):
+    '''
+    Retorna un diccionario con llave los géneros y valores lel número de
+    eventos individuales de escucha de cada género
+    Args:
+        analyzer: Analizador de eventos
+        criteria: Llave del analyzer a analizar
+        dicc: Diccionario con los géneros y los rangos
+        lista: Lista de los rangos
+    '''
     resultado = {}
     llaves = []
     for llave in dicc:
@@ -238,6 +316,18 @@ def getEventsByRangeGenres(analyzer, criteria, dicc, lista):
 
 
 def getTrcForTwoCriteria(analyzer, criteria1range, str1, criteria2range, str2):
+    '''
+    Retorna los varias características de los
+    eventos dado dos criterios y rangos en el mismo,
+    buscándolos en ambos árboles. El retorno son los eventos
+    que cumplen con ambas características
+    Args:
+        analyzer: Analizador de eventos
+        criteria1range: Rango del criterio 1
+        str1: Llave del analyzer del criterio 1
+        criteria2range: Rango del criterio 2
+        str2: Llave del analyzer del criterio 2
+    '''
     criteria1 = om.values(analyzer[str1], criteria1range[0], criteria1range[1])
     submap = {'events': None}
     submap[str2] = om.newMap(omaptype='RBT')
@@ -257,6 +347,9 @@ def getTrcForTwoCriteria(analyzer, criteria1range, str1, criteria2range, str2):
 
 
 def getRanges(lista_generos, dicc):
+    '''
+    Retorna los rangos dados los géneros
+    '''
     llaves = []
     lim_inf = 1000
     lim_sup = 0
@@ -301,6 +394,10 @@ def getRanges(lista_generos, dicc):
 
 
 def getTemposByTime(analyzer, tiempo_inicio, tiempo_final):
+    '''
+    Retorna los eventos dados los tiempos al usar la
+    funcion getEventsByRangeTempoReturn()
+    '''
     realstarttime = tiempo_inicio.split(':')
     realstarttime = (
         int(realstarttime[0])*3600 + int(realstarttime[1])*60
@@ -314,6 +411,10 @@ def getTemposByTime(analyzer, tiempo_inicio, tiempo_final):
 
 
 def getBestGenre(minimap, genredicc):
+    '''
+    Retorna un diccionario con el top de
+    los géneros dadas las repeticiones
+    '''
     asqueroso_top = {}
     bestgenre = None
     mayor = 0
@@ -330,6 +431,9 @@ def getBestGenre(minimap, genredicc):
 
 
 def getUniqueIDs(minimap, generos, bestgenre):
+    '''
+    Retorna los eventos únicos dada la llave concatenada
+    '''
     lim = generos[bestgenre]
     lst = om.values(minimap['tempo_map'], lim[0], lim[1])
     tracks = {'data': None}
@@ -352,6 +456,10 @@ def getUniqueIDs(minimap, generos, bestgenre):
 
 
 def getSentimentAnalysis(unique_ids, analyzer):
+    '''
+    Retorna los eventos que tienen un hashtag
+    determinado dada la llave concatenada
+    '''
     hashtags = analyzer['hashtags']
     vaders = analyzer['vaders']
     llaves = mp.keySet(unique_ids[0])
@@ -377,17 +485,3 @@ def getSentimentAnalysis(unique_ids, analyzer):
             mp.put(tracks, llave, vaderavg)
 
     return tracks
-
-# Funciones utilizadas para comparar elementos dentro de una lista
-
-
-def compareDates(date1, date2):
-    """
-    Compara dos fechas
-    """
-    if (date1 == date2):
-        return 0
-    elif (date1 > date2):
-        return 1
-    else:
-        return -1
