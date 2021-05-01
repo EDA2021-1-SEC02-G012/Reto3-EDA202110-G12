@@ -37,6 +37,11 @@ La vista se encarga de la interacción con el usuario.
 Presenta el menu de opciones  y  por cada seleccion
 hace la solicitud al controlador para ejecutar la
 operación seleccionada.
+Para poder ejecutar la carga de datos, debe guardar los
+archivos en una carpeta con el mismo nombre del porcen-
+taje, ej: subsamples-small como carpeta.
+A ello se deben las rutas de archivo a
+continuación
 """
 
 analyzer = None
@@ -202,6 +207,24 @@ def printgenresdict(dicc):
         print(key, ' Rango de tempo: ', dicc[key])
 
 
+def printtop10tracks(mapa, bestgenre):
+    '''
+    Imprime el top 10 del mapa de tracks
+    '''
+    print('Las tracks únicas de', bestgenre, 'son', mp.size(mapa))
+    keys = mp.keySet(mapa)
+    n = 1
+    for key in lt.iterator(keys):
+        if n == 11:
+            break
+        value = mp.get(mapa, key)
+        actualvalue = me.getValue(value)
+        print(
+            'TOP', n, 'track:', key, 'vader:', actualvalue[0], 'hashtags',
+            actualvalue[1])
+        n += 1
+
+
 """
 Menu principal
 """
@@ -318,7 +341,7 @@ while True:
         uniqueIDs = controller.getUniqueIDs(
             result, genre, bestgenre[1])
         result2 = controller.getSentimentAnalysis(uniqueIDs, analyzer)
-        print(mp.size(result2))
+        printtop10tracks(result2, bestgenre[1])
 
     else:
         sys.exit(0)

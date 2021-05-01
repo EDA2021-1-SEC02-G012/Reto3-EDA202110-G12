@@ -92,7 +92,7 @@ def loadHashtags(analyzer, file):
     input_file = csv.DictReader(open(analysis_file, encoding="utf-8"),
                                 delimiter=",")
     for event in input_file:
-        key = event['user_id'] + event['track_id'] + event['created_at']
+        key = event['user_id'] + event['track_id']
         model.addOnMap(analyzer, event['hashtag'], key, 'hashtags')
 
 

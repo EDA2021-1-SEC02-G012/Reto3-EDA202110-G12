@@ -89,8 +89,7 @@ def addEvent(analyzer, event):
     addEventOnProbingMap(analyzer, event['track_id'], event['id'], 'tracks')
     addEventOnOrderedRBTMap(
         analyzer, float(event['instrumentalness']),
-        event,
-        'instrumentalness')
+        event, 'instrumentalness')
     addEventOnOrderedRBTMap(
         analyzer, float(event['acousticness']),
         event, 'acousticness')
@@ -445,8 +444,7 @@ def getUniqueIDs(minimap, generos, bestgenre):
         for soundtrackyourtimeline in lt.iterator(lstevents['events']):
             unique_id = (
                 soundtrackyourtimeline['user_id']
-                + soundtrackyourtimeline['track_id']
-                + soundtrackyourtimeline['created_at'])
+                + soundtrackyourtimeline['track_id'])
             addEventOnProbingMap(
                 tracks, soundtrackyourtimeline['track_id'], unique_id, 'data')
 
@@ -464,6 +462,7 @@ def getSentimentAnalysis(unique_ids, analyzer):
     vaders = analyzer['vaders']
     llaves = mp.keySet(unique_ids[0])
     tracks = mp.newMap(maptype="PROBING")
+
     for llave in lt.iterator(llaves):
         ids = mp.get(unique_ids[0], llave)
         vaderavg = 0
@@ -471,7 +470,7 @@ def getSentimentAnalysis(unique_ids, analyzer):
         for each_id in lt.iterator(lista['events']):
             hashtag = mp.get(hashtags, each_id)
             hashtag_value = me.getValue(hashtag)
-            vader = mp.get(vaders, hashtag_value.lower())
+            vader = mp.get(vaders, hashtag_value)
             # Santiago no puso lower :)
             if (vader is not None):
                 vader_val = me.getValue(vader)
@@ -482,6 +481,6 @@ def getSentimentAnalysis(unique_ids, analyzer):
             listaX = me.getValue(ids)
             n = lt.size(listaX['events'])
             vaderavg = vaderavg/n
-            mp.put(tracks, llave, vaderavg)
+            mp.put(tracks, llave, (vaderavg, n))
 
     return tracks
