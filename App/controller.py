@@ -116,31 +116,90 @@ def getEventsByRange(analyzer, criteria, initial, final):
     '''
     Función puente entre las funciones homónimas entre el model y view
     '''
-    return model.getEventsByRange(analyzer, criteria, initial, final)
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
+    result = model.getEventsByRange(analyzer, criteria, initial, final)
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    return result, delta_time, delta_memory
 
 
 def getEventsByRangeGenres(analyzer, criteria, dicc, list):
     '''
     Función puente entre las funciones homónimas entre el model y view
     '''
-    return model.getEventsByRangeGenres(analyzer, criteria, dicc, list)
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
+    result = model.getEventsByRangeGenres(analyzer, criteria, dicc, list)
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    return result, delta_time, delta_memory
 
 
 def getMusicToParty(analyzer, energyrange, danceabilityrange):
     '''
     Función puente entre las funciones homónimas entre el model y view
     '''
-    return model.getTrcForTwoCriteria(
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
+    result = model.getTrcForTwoCriteria(
         analyzer, energyrange, 'energy', danceabilityrange, 'danceability')
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    return result, delta_time, delta_memory
 
 
 def getMusicToStudy(analyzer, instrumentalnessrange, temporange):
     '''
     Función puente entre las funciones homónimas entre el model y view
     '''
-    return model.getTrcForTwoCriteria(
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
+    result = model.getTrcForTwoCriteria(
         analyzer,
         instrumentalnessrange, 'instrumentalness', temporange, 'tempo')
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    return result, delta_time, delta_memory
 
 
 def getBestGenre(minimap, genredicc):
@@ -175,7 +234,22 @@ def getSentimentAnalysis(unique_ids, analyzer):
     '''
     Función puente entre las funciones homónimas entre el model y view
     '''
-    return model.getSentimentAnalysis(unique_ids, analyzer)
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
+    result = model.getSentimentAnalysis(unique_ids, analyzer)
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    return result, delta_time, delta_memory
 
 
 def eventsSize(analyzer):

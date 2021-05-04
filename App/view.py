@@ -29,6 +29,7 @@ import os
 import random
 from DISClib.ADT import map as mp
 from DISClib.ADT import list as lt
+from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 assert cf
 
@@ -194,7 +195,7 @@ def printfortotal(analyzer, ranges):
     for every_tuple in ranges:
         events = controller.getEventsByRange(
             analyzer, 'tempo', every_tuple[0], every_tuple[1])
-        total_events += events[0]
+        total_events += events[0][0]
     print('\n')
     print("Registro de eventos únicos totales: " + str(total_events))
 
@@ -252,6 +253,15 @@ while True:
             f"{answer[0]:.3f}", "  ||  ",
             "Memoria [kB]: ",
             f"{answer[1]:.3f}")
+        print('instrumentalness: ', om.height(analyzer['instrumentalness']))
+        print('acousticness: ', om.height(analyzer['acousticness']))
+        print('liveness: ', om.height(analyzer['liveness']))
+        print('speechiness: ', om.height(analyzer['speechiness']))
+        print('energy: ', om.height(analyzer['energy']))
+        print('danceability: ', om.height(analyzer['danceability']))
+        print('valence: ', om.height(analyzer['valence']))
+        print('tempo: ', om.height(analyzer['tempo']))
+        print('created_at: ', om.height(analyzer['created_at']))
 
     elif int(inputs[0]) == 2:
         criteria = input("Ingrese el criterio a evaluar: ")
@@ -260,8 +270,13 @@ while True:
         print("Buscando en la base de datos ....")
         result = controller.getEventsByRange(
             analyzer, criteria, initial, final)
-        print('Registro de eventos Cargados: ' + str(result[0]))
-        print('Artistas únicos Cargados: ' + str(result[1]))
+        print('Registro de eventos Cargados: ' + str(result[0][0]))
+        print('Artistas únicos Cargados: ' + str(result[0][1]))
+        print(
+            "Tiempo [ms]: ",
+            f"{result[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ",
+            f"{result[2]:.3f}")
 
     elif int(inputs[0]) == 3:
         initialenergy = float(input(
@@ -277,9 +292,14 @@ while True:
         print("Buscando en la base de datos ....")
         result = controller.getMusicToParty(
             analyzer, energyrange, danceabilityrange)
-        print('Artistas únicos Cargados:', str(result[0]))
-        print('Tracks únicas Cargadas:', str(result[1]))
-        printRandom5(result[2], 'energy', 'danceability')
+        print('Artistas únicos Cargados:', str(result[0][0]))
+        print('Tracks únicas Cargadas:', str(result[0][1]))
+        printRandom5(result[0][2], 'energy', 'danceability')
+        print(
+            "Tiempo [ms]: ",
+            f"{result[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ",
+            f"{result[2]:.3f}")
 
     elif int(inputs[0]) == 4:
         initialinstrumentalness = float(input(
@@ -296,9 +316,14 @@ while True:
         print("Buscando en la base de datos ....")
         result = controller.getMusicToStudy(
             analyzer, instrumentalnessrange, temporange)
-        print('Artistas únicos Cargados:', str(result[0]))
-        print('Tracks únicas Cargadas:', str(result[1]))
-        printRandom5(result[2], 'instrumentalness', 'tempo')
+        print('Artistas únicos Cargados:', str(result[0][0]))
+        print('Tracks únicas Cargadas:', str(result[0][1]))
+        printRandom5(result[0][2], 'instrumentalness', 'tempo')
+        print(
+            "Tiempo [ms]: ",
+            f"{result[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ",
+            f"{result[2]:.3f}")
 
     elif int(inputs[0]) == 5:
         genero = input("Ingrese el nombre del género musical: ")
@@ -326,8 +351,13 @@ while True:
         ranges = controller.getRanges(lista_generos, genre)
         dicc = controller.getEventsByRangeGenres(
             analyzer, 'tempo', genre, lista_generos)
-        printgenre(dicc)
+        printgenre(dicc[0])
         printfortotal(analyzer, ranges)
+        print(
+            "Tiempo [ms]: ",
+            f"{dicc[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ",
+            f"{dicc[2]:.3f}")
 
     elif int(inputs[0]) == 7:
         print("Ingrese la hora de inicio en formato 24h: (Ej. 12:34:56)")
@@ -341,7 +371,12 @@ while True:
         uniqueIDs = controller.getUniqueIDs(
             result, genre, bestgenre[1])
         result2 = controller.getSentimentAnalysis(uniqueIDs, analyzer)
-        printtop10tracks(result2, bestgenre[1])
+        printtop10tracks(result2[0], bestgenre[1])
+        print(
+            "Tiempo [ms]: ",
+            f"{result2[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ",
+            f"{result2[2]:.3f}")
 
     else:
         sys.exit(0)

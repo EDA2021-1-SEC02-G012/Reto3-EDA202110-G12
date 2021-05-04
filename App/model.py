@@ -85,8 +85,8 @@ def addEvent(analyzer, event):
     cada uno de sus mapas
     '''
     lt.addLast(analyzer['listening_events'], event)
-    addEventOnProbingMap(analyzer, event['artist_id'], event['id'], 'artists')
-    addEventOnProbingMap(analyzer, event['track_id'], event['id'], 'tracks')
+    mp.put(analyzer['artists'], event['artist_id'], 0)
+    mp.put(analyzer['tracks'], event['track_id'], 0)
     addEventOnOrderedRBTMap(
         analyzer, float(event['instrumentalness']),
         event, 'instrumentalness')
@@ -154,12 +154,11 @@ def addEventOnOrderedRBTMap(analyzer, int_input, event, map_key):
         map_key: Especifica cuál mapa
     """
     selected_map = analyzer[map_key]
-    existkey = om.contains(selected_map, int_input)
-    if existkey:
-        entry = om.get(selected_map, int_input)
+    entry = om.get(selected_map, int_input)
+    if entry is not None:
         value = me.getValue(entry)
     else:
-        value = newSeparator(int_input, map_key)
+        value = newDataEntry()
         om.put(selected_map, int_input, value)
     lt.addLast(value['events'], event)
 
@@ -192,7 +191,14 @@ def newSeparator(key, classifier):
     return separator
 
 
+def newDataEntry():
+    entry = {'events': None}
+    entry['events'] = lt.newList('ARRAY_LIST')
+    return entry
+
+
 # Funciones de consulta
+
 
 def eventsSize(analyzer):
     '''
@@ -299,12 +305,11 @@ def getEventsByRangeGenres(analyzer, criteria, dicc, lista):
         lista: Lista de los rangos
     '''
     resultado = {}
-    llaves = []
-    for llave in dicc:
-        llaves.append(llave[0])
     for i in lista:
         for llave in dicc:
-            if i in llave:
+            llave1 = llave.split('- ')
+            llave1 = llave1[0]
+            if i == llave1:
                 lim = dicc[llave]
                 lim_inf = lim[0]
                 lim_sup = lim[1]
@@ -349,15 +354,14 @@ def getRanges(lista_generos, dicc):
     '''
     Retorna los rangos dados los géneros
     '''
-    llaves = []
     lim_inf = 1000
     lim_sup = 0
 
-    for llave in dicc:
-        llaves.append(llave[0])
     for i in lista_generos:
         for llave in dicc:
-            if i in llave:
+            llave1 = llave.split('- ')
+            llave1 = llave1[0]
+            if i == llave1:
                 lim = dicc[llave]
                 if lim[0] <= lim_inf:
                     lim_inf = lim[0]
