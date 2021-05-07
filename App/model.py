@@ -60,8 +60,10 @@ def newAnalyzer():
                 }
 
     analyzer['listening_events'] = lt.newList(datastructure='ARRAY_LIST')
-    analyzer['artists'] = mp.newMap(maptype='PROBING')
-    analyzer['tracks'] = mp.newMap(maptype='PROBING')
+    analyzer['artists'] = mp.newMap(
+        numelements=40000, maptype='PROBING')
+    analyzer['tracks'] = mp.newMap(
+        numelements=40000, maptype='PROBING')
     analyzer['instrumentalness'] = om.newMap(omaptype='RBT')
     analyzer['acousticness'] = om.newMap(omaptype='RBT')
     analyzer['liveness'] = om.newMap(omaptype='RBT')
@@ -71,8 +73,10 @@ def newAnalyzer():
     analyzer['valence'] = om.newMap(omaptype='RBT')
     analyzer['tempo'] = om.newMap(omaptype='RBT')
     analyzer['created_at'] = om.newMap(omaptype='RBT')
-    analyzer['hashtags'] = mp.newMap(maptype='PROBING')
-    analyzer['vaders'] = mp.newMap(maptype='PROBING')
+    analyzer['hashtags'] = mp.newMap(
+        numelements=100000, maptype='PROBING')
+    analyzer['vaders'] = mp.newMap(
+        numelements=10000, maptype='PROBING')
 
     return analyzer
 
@@ -87,32 +91,20 @@ def addEvent(analyzer, event):
     lt.addLast(analyzer['listening_events'], event)
     mp.put(analyzer['artists'], event['artist_id'], 0)
     mp.put(analyzer['tracks'], event['track_id'], 0)
-    addEventOnOrderedRBTMap(
-        analyzer, float(event['instrumentalness']),
-        event, 'instrumentalness')
-    addEventOnOrderedRBTMap(
-        analyzer, float(event['acousticness']),
-        event, 'acousticness')
-    addEventOnOrderedRBTMap(
-        analyzer, float(event['liveness']),
-        event, 'liveness')
-    addEventOnOrderedRBTMap(
-        analyzer, float(event['speechiness']),
-        event, 'speechiness')
-    addEventOnOrderedRBTMap(
-        analyzer, float(event['energy']),
-        event, 'energy')
-    addEventOnOrderedRBTMap(
-        analyzer, float(event['danceability']),
-        event, 'danceability')
-    addEventOnOrderedRBTMap(
-        analyzer, float(event['valence']),
-        event, 'valence')
-    addEventOnOrderedRBTMap(
-        analyzer, float(event['tempo']),
-        event, 'tempo')
+    juancarlos(analyzer, event)
     addTimedEvent(
         analyzer, event['created_at'], event, 'created_at')
+
+
+def juancarlos(analyzer, event):
+    yourtimeline = [
+        'instrumentalness', 'acousticness',
+        'liveness', 'speechiness', 'energy',
+        'danceability', 'valence', 'tempo']
+    for soundtrack in yourtimeline:
+        addEventOnOrderedRBTMap(
+            analyzer, float(event[soundtrack]),
+            event, soundtrack)
 
 
 def addOnMap(analyzer, event, key, map_name):
@@ -120,27 +112,6 @@ def addOnMap(analyzer, event, key, map_name):
     Agrega los hashtags y los vaders a sus mapas individuales
     '''
     mp.put(analyzer[map_name], key, event)
-
-
-def addEventOnProbingMap(analyzer, int_input, event, map_key):
-    """
-    La función de addEventOnProbingMap() adiciona el video al mapa
-    tipo PROBING que se ha seleccionado.
-    Args:
-        analyzer: Analizador de eventos
-        int_input: Llave a analizar
-        video: Video a añadir
-        map_key: Especifica cuál mapa
-    """
-    selected_map = analyzer[map_key]
-    existkey = mp.contains(selected_map, int_input)
-    if existkey:
-        entry = mp.get(selected_map, int_input)
-        value = me.getValue(entry)
-    else:
-        value = newSeparator(int_input, map_key)
-        mp.put(selected_map, int_input, value)
-    lt.addLast(value['events'], event)
 
 
 def addEventOnOrderedRBTMap(analyzer, int_input, event, map_key):
@@ -177,6 +148,37 @@ def addTimedEvent(analyzer, int_input, event, map_key):
         event, map_key)
 
 
+def newDataEntry():
+    '''
+    Crea un bucket para guardar todos los eventos dentro de
+    la categoría
+    '''
+    entry = {'events': None}
+    entry['events'] = lt.newList('ARRAY_LIST')
+    return entry
+
+
+def addEventOnProbingMap(analyzer, int_input, event, map_key):
+    """
+    La función de addEventOnProbingMap() adiciona el video al mapa
+    tipo PROBING que se ha seleccionado.
+    Args:
+        analyzer: Analizador de eventos
+        int_input: Llave a analizar
+        video: Video a añadir
+        map_key: Especifica cuál mapa
+    """
+    selected_map = analyzer[map_key]
+    existkey = mp.contains(selected_map, int_input)
+    if existkey:
+        entry = mp.get(selected_map, int_input)
+        value = me.getValue(entry)
+    else:
+        value = newSeparator(int_input, map_key)
+        mp.put(selected_map, int_input, value)
+    lt.addLast(value['events'], event)
+
+
 def newSeparator(key, classifier):
     """
     La función de newSeparator() crea una nueva estructura
@@ -189,12 +191,6 @@ def newSeparator(key, classifier):
     separator[classifier] = key
     separator['events'] = lt.newList('ARRAY_LIST', None)
     return separator
-
-
-def newDataEntry():
-    entry = {'events': None}
-    entry['events'] = lt.newList('ARRAY_LIST')
-    return entry
 
 
 # Funciones de consulta
@@ -448,9 +444,19 @@ def getUniqueIDs(minimap, generos, bestgenre):
         for soundtrackyourtimeline in lt.iterator(lstevents['events']):
             unique_id = (
                 soundtrackyourtimeline['user_id']
-                + soundtrackyourtimeline['track_id'])
-            addEventOnProbingMap(
-                tracks, soundtrackyourtimeline['track_id'], unique_id, 'data')
+                + soundtrackyourtimeline['track_id']
+                + soundtrackyourtimeline['created_at'])
+
+            if mp.contains(tracks['data'], soundtrackyourtimeline['track_id']):
+                x = mp.get(tracks['data'], soundtrackyourtimeline['track_id'])
+                listids = me.getValue(x)
+            else:
+                listids = lt.newList('ARRAY_LIST')
+            lt.addLast(listids, unique_id)
+
+            mp.put(
+                tracks['data'], soundtrackyourtimeline['track_id'],
+                listids)
 
     tracks_size = mp.size(tracks['data'])
 
@@ -471,20 +477,31 @@ def getSentimentAnalysis(unique_ids, analyzer):
         ids = mp.get(unique_ids[0], llave)
         vaderavg = 0
         lista = me.getValue(ids)
-        for each_id in lt.iterator(lista['events']):
+        n = 0
+        for each_id in lt.iterator(lista):
             hashtag = mp.get(hashtags, each_id)
             hashtag_value = me.getValue(hashtag)
-            vader = mp.get(vaders, hashtag_value)
+            vader = mp.get(vaders, hashtag_value.lower())
             # Santiago no puso lower :)
             if (vader is not None):
                 vader_val = me.getValue(vader)
                 if (vader_val is not None) and (vader_val != ''):
                     vaderavg += float(vader_val)
+                    n += 1
 
         if vaderavg != 0.0:
-            listaX = me.getValue(ids)
-            n = lt.size(listaX['events'])
             vaderavg = vaderavg/n
             mp.put(tracks, llave, (vaderavg, n))
 
     return tracks
+
+
+# Funciones de comparacion
+
+
+def comparestrings(str1, str2):
+    """
+    La función de comparetitles() retorna True or False si el título de un
+    video es mayor al de otro video ordenando alfabéticamente
+    """
+    return (str1['title']) > (str2['title'])

@@ -81,6 +81,7 @@ def printTopGenres(dicc):
     '''
     Imprime los géneros iterando el diccionario
     '''
+    print('\n')
     events = dicc.values()
     events = sorted(events, reverse=True)
     top = 1
@@ -212,6 +213,8 @@ def printtop10tracks(mapa, bestgenre):
     '''
     Imprime el top 10 del mapa de tracks
     '''
+    print('\n')
+    bestgenre = bestgenre.split('- ')[1]
     print('Las tracks únicas de', bestgenre, 'son', mp.size(mapa))
     keys = mp.keySet(mapa)
     n = 1
@@ -235,7 +238,7 @@ while True:
 
     if int(inputs[0]) == 1:
         analyzer = controller.init()
-        print("Cargando información de los archivos ....")
+        print("Cargando información de los archivos...")
         answer = controller.loadData(
             analyzer, events_analysis_file, hashtag_file, sentiment_values)
         print('Registro de eventos Cargados: ' + str(controller.eventsSize(
