@@ -97,6 +97,10 @@ def addEvent(analyzer, event):
 
 
 def juancarlos(analyzer, event):
+    '''
+    La función juancarlos() itera las características
+    y agrega el evento individual al mapa correspondiente
+    '''
     yourtimeline = [
         'instrumentalness', 'acousticness',
         'liveness', 'speechiness', 'energy',
@@ -494,14 +498,3 @@ def getSentimentAnalysis(unique_ids, analyzer):
             mp.put(tracks, llave, (vaderavg, n))
 
     return tracks
-
-
-# Funciones de comparacion
-
-
-def comparestrings(str1, str2):
-    """
-    La función de comparetitles() retorna True or False si el título de un
-    video es mayor al de otro video ordenando alfabéticamente
-    """
-    return (str1['title']) > (str2['title'])
