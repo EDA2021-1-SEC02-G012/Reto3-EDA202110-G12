@@ -367,6 +367,11 @@ while True:
         tiempo_inicio = input("~")
         print("Ingrese la hora final en formato 24h: (Ej. 12:34:56)")
         tiempo_final = input("~")
+        print(
+            "Eventos de escucha entre", tiempo_inicio, 'y', tiempo_final,
+            ":", controller.getPlaying(
+                    analyzer['created_at'],
+                    (tiempo_inicio, tiempo_final)))
         result = controller.getTemposByTime(
             analyzer, tiempo_inicio, tiempo_final)
         bestgenre = controller.getBestGenre(result, genre)

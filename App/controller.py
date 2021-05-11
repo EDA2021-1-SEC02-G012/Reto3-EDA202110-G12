@@ -230,6 +230,10 @@ def getUniqueIDs(minimap, generos, bestgenre):
     return model.getUniqueIDs(minimap, generos, bestgenre)
 
 
+def getPlaying(mapa, limite):
+    return model.getPlaying(mapa, limite)
+
+
 def getSentimentAnalysis(unique_ids, analyzer):
     '''
     Función puente entre las funciones homónimas entre el model y view

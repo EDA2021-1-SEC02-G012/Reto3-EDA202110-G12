@@ -433,6 +433,18 @@ def getBestGenre(minimap, genredicc):
     return asqueroso_top, bestgenre
 
 
+def getPlaying(mapa, limite):
+    limite_inf = limite[0]
+    limite_inf = limite_inf.split(':')
+    limite_inf = int(limite_inf[0])*3600 + int(limite_inf[1])*60 + int(
+        limite_inf[2])
+    limite_sup = limite[1]
+    limite_sup = limite_sup.split(':')
+    limite_sup = int(limite_sup[0])*3600 + int(limite_sup[1])*60 + int(
+        limite_sup[2])
+    return lt.size(om.values(mapa, limite_inf, limite_sup))
+
+
 def getUniqueIDs(minimap, generos, bestgenre):
     '''
     Retorna los eventos únicos dada la llave concatenada
