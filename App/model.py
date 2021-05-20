@@ -91,12 +91,12 @@ def addEvent(analyzer, event):
     lt.addLast(analyzer['listening_events'], event)
     mp.put(analyzer['artists'], event['artist_id'], 0)
     mp.put(analyzer['tracks'], event['track_id'], 0)
-    juancarlos(analyzer, event)
+    loadCriteria(analyzer, event)
     addTimedEvent(
         analyzer, event['created_at'], event, 'created_at')
 
 
-def juancarlos(analyzer, event):
+def loadCriteria(analyzer, event):
     '''
     La función juancarlos() itera las características
     y agrega el evento individual al mapa correspondiente
@@ -418,19 +418,19 @@ def getBestGenre(minimap, genredicc):
     Retorna un diccionario con el top de
     los géneros dadas las repeticiones
     '''
-    asqueroso_top = {}
+    top = {}
     bestgenre = None
     mayor = 0
     for genre in genredicc:
         lim = genredicc[genre]
         events = getTotalEventsByRangeGenre(
             minimap, 'tempo_map', lim[0], lim[1])
-        asqueroso_top[genre] = events
+        top[genre] = events
         if events > mayor:
             mayor = events
             bestgenre = genre
 
-    return asqueroso_top, bestgenre
+    return top, bestgenre
 
 
 def getPlaying(mapa, limite):
@@ -498,7 +498,6 @@ def getSentimentAnalysis(unique_ids, analyzer):
             hashtag = mp.get(hashtags, each_id)
             hashtag_value = me.getValue(hashtag)
             vader = mp.get(vaders, hashtag_value.lower())
-            # Santiago no puso lower :)
             if (vader is not None):
                 vader_val = me.getValue(vader)
                 if (vader_val is not None) and (vader_val != ''):

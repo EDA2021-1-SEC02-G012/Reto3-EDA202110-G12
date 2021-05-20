@@ -288,9 +288,9 @@ while True:
             "Ingrese el límite superior para la energía: "))
         energyrange = (initialenergy, finalenergy)
         initialdanceability = float(input(
-            "Ingrese el límite inferior para la perreabilidad: "))
+            "Ingrese el límite inferior para la bailabilidad: "))
         finaldanceability = float(input(
-            "Ingrese el límite superior para la perreabilidad: "))
+            "Ingrese el límite superior para la bailabilidad: "))
         danceabilityrange = (initialdanceability, finaldanceability)
         print("Buscando en la base de datos ....")
         result = controller.getMusicToParty(
